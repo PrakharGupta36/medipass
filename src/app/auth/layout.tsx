@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import LandingPage from "@/components/home/landing-page";
 
-export default async function HomePage() {
+export default async function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const supabase = await createClient();
 
   const {
@@ -13,5 +16,5 @@ export default async function HomePage() {
     redirect("/dashboard");
   }
 
-  return <LandingPage />;
+  return children;
 }

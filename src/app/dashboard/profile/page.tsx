@@ -1,5 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
-import { CalendarDays, Mail, Phone, UserRound } from "lucide-react";
+import {
+  CalendarDays,
+  Droplets,
+  Mail,
+  Phone,
+  ShieldAlert,
+  UserRound,
+} from "lucide-react";
+import { updateProfile } from "./actions";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -8,11 +16,33 @@ export default async function ProfilePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return null;
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const name =
-    user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+    profile?.full_name ||
+    user.user_metadata?.full_name ||
+    user.email?.split("@")[0] ||
+    "";
+
+  const memberSince = user.created_at
+    ? new Date(user.created_at).toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "—";
 
   return (
     <div>
+      {/* Mobile heading */}
       <div className="mb-7 lg:hidden">
         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#62C58C]">
           Account
@@ -38,18 +68,24 @@ export default async function ProfilePage() {
             <ProfileStat
               icon={<Mail size={16} />}
               label="Email"
-              value={user?.email || "Not added"}
+              value={user.email || "Not added"}
             />
 
             <ProfileStat
               icon={<CalendarDays size={16} />}
               label="Member since"
-              value="Today"
+              value={memberSince}
+            />
+
+            <ProfileStat
+              icon={<Droplets size={16} />}
+              label="Blood group"
+              value={profile?.blood_group || "Not added"}
             />
           </div>
         </section>
 
-        {/* Personal details */}
+        {/* Personal information */}
         <section className="rounded-[26px] border border-white/[0.07] bg-[#111712]">
           <div className="border-b border-white/[0.06] px-6 py-5">
             <p className="text-sm font-semibold">Personal information</p>
@@ -59,26 +95,164 @@ export default async function ProfilePage() {
             </p>
           </div>
 
-          <div className="grid gap-5 p-6 sm:grid-cols-2">
-            <ProfileField label="Full name" value={name} />
+          <form action={updateProfile}>
+            <div className="grid gap-5 p-6 sm:grid-cols-2">
+              <FormField
+                label="Full name"
+                name="full_name"
+                defaultValue={profile?.full_name || name}
+                placeholder="Your full name"
+              />
 
-            <ProfileField label="Email address" value={user?.email || ""} />
+              <div>
+                <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.1em] text-white/25">
+                  Email address
+                </label>
 
-            <ProfileField
-              label="Phone number"
-              value="Not added"
-              icon={<Phone size={14} />}
-            />
+                <div className="flex h-11 items-center gap-2 rounded-xl border border-white/[0.07] bg-[#0C110E] px-3.5">
+                  <Mail size={14} className="shrink-0 text-white/25" />
 
-            <ProfileField label="Date of birth" value="Not added" />
-          </div>
+                  <span className="truncate text-xs text-white/45">
+                    {user.email}
+                  </span>
+                </div>
 
-          <div className="border-t border-white/[0.06] px-6 py-5">
-            <button className="h-10 rounded-xl border border-white/[0.08] bg-white/[0.025] px-4 text-xs font-semibold text-white/55 transition hover:bg-white/[0.05] hover:text-white">
-              Edit profile
-            </button>
-          </div>
+                <p className="mt-1.5 text-[9px] text-white/20">
+                  Email is managed by your account.
+                </p>
+              </div>
+
+              <FormField
+                label="Phone number"
+                name="phone"
+                type="tel"
+                defaultValue={profile?.phone || ""}
+                placeholder="e.g. +91 98765 43210"
+              />
+
+              <FormField
+                label="Date of birth"
+                name="date_of_birth"
+                type="date"
+                defaultValue={profile?.date_of_birth || ""}
+              />
+
+              <div className="sm:col-span-2">
+                <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.1em] text-white/25">
+                  Blood group
+                </label>
+
+                <select
+                  name="blood_group"
+                  defaultValue={profile?.blood_group || ""}
+                  className="h-11 w-full rounded-xl border border-white/[0.07] bg-[#0C110E] px-3.5 text-xs text-white/60 outline-none transition focus:border-[#62C58C]/30 focus:ring-2 focus:ring-[#62C58C]/10"
+                >
+                  <option value="">Select blood group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A−</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B−</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB−</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O−</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Emergency */}
+            <div className="border-t border-white/[0.06] px-6 py-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#D7A73A]/10 text-[#D7A73A]">
+                  <ShieldAlert size={17} />
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold">Emergency contact</p>
+
+                  <p className="mt-1 text-[10px] leading-5 text-white/25">
+                    Someone a doctor can contact in an emergency.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                <FormField
+                  label="Contact name"
+                  name="emergency_contact_name"
+                  defaultValue={profile?.emergency_contact_name || ""}
+                  placeholder="Emergency contact"
+                />
+
+                <FormField
+                  label="Contact phone"
+                  name="emergency_contact_phone"
+                  type="tel"
+                  defaultValue={profile?.emergency_contact_phone || ""}
+                  placeholder="+91 98765 43210"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-white/[0.06] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-[10px] leading-5 text-white/20">
+                Your information is stored in your private medical profile.
+              </p>
+
+              <button
+                type="submit"
+                className="h-10 rounded-xl bg-[#246B45] px-5 text-xs font-semibold text-white transition hover:bg-[#2C7D53]"
+              >
+                Save profile
+              </button>
+            </div>
+          </form>
         </section>
+      </div>
+    </div>
+  );
+}
+
+function FormField({
+  label,
+  name,
+  defaultValue,
+  placeholder,
+  type = "text",
+}: {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  placeholder?: string;
+  type?: string;
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={name}
+        className="mb-2 block text-[10px] font-medium uppercase tracking-[0.1em] text-white/25"
+      >
+        {label}
+      </label>
+
+      <div className="relative">
+        {type === "tel" && (
+          <Phone
+            size={14}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20"
+          />
+        )}
+
+        <input
+          id={name}
+          name={name}
+          type={type}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          className={`h-11 w-full rounded-xl border border-white/[0.07] bg-[#0C110E] pr-3.5 text-xs text-white/70 outline-none transition placeholder:text-white/15 focus:border-[#62C58C]/30 focus:ring-2 focus:ring-[#62C58C]/10 ${
+            type === "tel" ? "pl-10" : "pl-3.5"
+          }`}
+        />
       </div>
     </div>
   );
@@ -105,30 +279,6 @@ function ProfileStat({
         </p>
 
         <p className="mt-1 truncate text-xs text-white/55">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function ProfileField({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.1em] text-white/25">
-        {label}
-      </label>
-
-      <div className="flex h-11 items-center gap-2 rounded-xl border border-white/[0.07] bg-[#0C110E] px-3.5">
-        {icon && <span className="text-white/25">{icon}</span>}
-
-        <span className="truncate text-xs text-white/55">{value}</span>
       </div>
     </div>
   );

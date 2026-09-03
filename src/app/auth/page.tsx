@@ -49,6 +49,7 @@ export default function AuthPage() {
             data: {
               full_name: name,
             },
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
           },
         });
 
@@ -61,15 +62,22 @@ export default function AuthPage() {
         }
 
         if (data.session) {
-          toast.success("Welcome to MediPass!");
+          toast.success("Welcome to MediPass", {
+            description: "Your medical passport is ready.",
+          });
 
-          router.push("/dashboard");
+          router.replace("/dashboard");
           router.refresh();
 
           return;
         }
 
         // Email confirmation required
+
+        toast.success("Check your inbox", {
+          description:
+            "We've sent you a confirmation link to finish creating your account.",
+        });
 
         router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
 
@@ -367,12 +375,12 @@ export default function AuthPage() {
                 {/* Forgot password */}
                 {mode === "login" && (
                   <div className="-mt-1 flex justify-end">
-                    <button
-                      type="button"
+                    <Link
+                      href="/auth/forgot-password"
                       className="text-xs font-semibold text-[#2563EB] transition hover:text-[#1D4ED8] dark:text-[#6EA8FE] dark:hover:text-[#8BB9FF]"
                     >
                       Forgot your password?
-                    </button>
+                    </Link>
                   </div>
                 )}
 

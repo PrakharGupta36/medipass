@@ -1,21 +1,24 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import {
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   Eye,
   EyeOff,
+  HeartPulse,
   Loader2,
   Lock,
+  ShieldCheck,
 } from "lucide-react";
+
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 
+import { createClient } from "@/lib/supabase/client";
+
 export default function ResetPasswordPage() {
-  const router = useRouter();
   const supabase = createClient();
 
   const [password, setPassword] = useState("");
@@ -23,24 +26,27 @@ export default function ResetPasswordPage() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (password.length < 8) {
-      toast.error("Password too short", {
-        description: "Your password must contain at least 8 characters.",
-      });
+    if (loading) return;
 
+    if (password.length < 6) {
+      toast.error("Password too short", {
+        description: "Your password must contain at least 6 characters.",
+      });
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-
+      toast.error("Passwords don't match", {
+        description: "Make sure both password fields are identical.",
+      });
       return;
     }
 
@@ -52,135 +58,179 @@ export default function ResetPasswordPage() {
       });
 
       if (error) {
-        toast.error("Could not update password", {
+        toast.error("Password update failed", {
           description: error.message,
         });
-
         return;
       }
 
-      toast.success("Password updated", {
-        description: "Your MediPass password has been changed.",
-        icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
-      });
+      setSuccess(true);
 
-      router.push("/dashboard/settings");
-      router.refresh();
-    } catch {
+      toast.success("Password updated", {
+        description: "Your MediPass password has been changed successfully.",
+      });
+    } catch (error) {
+      console.error("RESET PASSWORD ERROR:", error);
+
       toast.error("Something went wrong", {
-        description: "Please request another password reset link.",
+        description: "Please request a new password reset link.",
       });
     } finally {
       setLoading(false);
     }
   }
 
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-[#080D0A] px-4 py-8 text-white">
-      <div className="w-full max-w-md">
-        <Link
-          href="/auth"
-          className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-white/30 transition hover:text-white/60"
-        >
-          <ArrowLeft size={13} />
-          Back to sign in
-        </Link>
+  if (success) {
+    return (
+      <main className="min-h-screen bg-[#080D0A] px-4 py-6 text-white">
+        <div className="mx-auto flex min-h-[calc(100vh-48px)] max-w-[520px] items-center justify-center">
+          <section className="w-full rounded-[28px] border border-white/[0.08] bg-[#111712] p-8 text-center shadow-[0_30px_100px_rgba(0,0,0,0.4)]">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1F7A4F]/15 text-[#62C58C]">
+              <CheckCircle2 size={28} />
+            </div>
 
-        <div className="mt-8 border-y border-white/[0.08] py-8">
-          <div className="flex h-10 w-10 items-center justify-center border border-[#62C58C]/15 bg-[#1F7A4F]/[0.06] text-[#62C58C]">
-            <Lock size={17} />
+            <h1 className="mt-6 text-2xl font-semibold">Password changed</h1>
+
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-white/35">
+              Your MediPass password has been successfully updated.
+            </p>
+
+            <Link
+              href="/auth"
+              className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#246B45] px-6 text-sm font-semibold transition hover:bg-[#1F603D]"
+            >
+              Continue to sign in
+              <ArrowRight size={16} />
+            </Link>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#080D0A] px-4 py-6 text-white">
+      <div className="mx-auto flex min-h-[calc(100vh-48px)] max-w-[520px] items-center justify-center">
+        <section className="w-full rounded-[28px] border border-white/[0.08] bg-[#111712] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.4)] sm:p-9">
+          <Link
+            href="/auth"
+            className="mb-8 inline-flex h-10 items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 text-xs text-white/45 transition hover:bg-white/[0.05] hover:text-white"
+          >
+            <ArrowLeft size={15} />
+            Back
+          </Link>
+
+          <div className="mb-8">
+            <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#1F7A4F]/15 text-[#62C58C]">
+              <HeartPulse size={20} />
+            </div>
+
+            <h1 className="text-3xl font-semibold tracking-[-0.04em]">
+              Create a new password
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-white/35">
+              Choose a strong password for your MediPass account.
+            </p>
           </div>
 
-          <p className="mt-6 font-mono text-[9px] uppercase tracking-[0.18em] text-[#62C58C]/70">
-            Account security
-          </p>
-
-          <h1 className="mt-2 text-3xl font-medium tracking-[-0.05em]">
-            Set a new password
-          </h1>
-
-          <p className="mt-2 text-xs leading-5 text-white/30">
-            Choose a new password for your MediPass account.
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <PasswordField
-              id="password"
               label="New password"
               value={password}
               onChange={setPassword}
-              visible={showPassword}
+              show={showPassword}
               onToggle={() => setShowPassword((value) => !value)}
+              autoComplete="new-password"
+              loading={loading}
             />
 
             <PasswordField
-              id="confirm-password"
               label="Confirm password"
               value={confirmPassword}
               onChange={setConfirmPassword}
-              visible={showConfirm}
-              onToggle={() => setShowConfirm((value) => !value)}
+              show={showConfirmPassword}
+              onToggle={() => setShowConfirmPassword((value) => !value)}
+              autoComplete="new-password"
+              loading={loading}
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="flex h-11 w-full items-center justify-center gap-2 bg-[#246B45] text-xs font-semibold transition hover:bg-[#2C7D53] disabled:cursor-wait disabled:opacity-60"
+              className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#246B45] text-sm font-semibold text-white shadow-[0_6px_18px_rgba(36,107,69,0.18)] transition hover:bg-[#1F603D] disabled:pointer-events-none disabled:opacity-50"
             >
-              {loading && <Loader2 size={14} className="animate-spin" />}
-
-              {loading ? "Updating password..." : "Update password"}
+              {loading ? (
+                <>
+                  <Loader2 size={17} className="animate-spin" />
+                  Updating password...
+                </>
+              ) : (
+                <>
+                  Update password
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </form>
-        </div>
+
+          <div className="mt-7 flex items-center justify-center gap-2 text-[10px] text-white/20">
+            <ShieldCheck size={13} />
+            Your password is securely stored
+          </div>
+        </section>
       </div>
     </main>
   );
 }
 
 function PasswordField({
-  id,
   label,
   value,
   onChange,
-  visible,
+  show,
   onToggle,
+  autoComplete,
+  loading,
 }: {
-  id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
-  visible: boolean;
+  show: boolean;
   onToggle: () => void;
+  autoComplete: string;
+  loading: boolean;
 }) {
   return (
-    <div>
-      <label
-        htmlFor={id}
-        className="mb-2 block font-mono text-[9px] uppercase tracking-[0.12em] text-white/25"
-      >
-        {label}
-      </label>
+    <div className="space-y-2">
+      <label className="text-xs font-medium text-white/55">{label}</label>
 
       <div className="relative">
+        <Lock
+          size={17}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
+        />
+
         <input
-          id={id}
-          type={visible ? "text" : "password"}
+          type={show ? "text" : "password"}
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          minLength={6}
           required
-          minLength={8}
-          className="h-11 w-full border border-white/[0.08] bg-[#0C110E] px-3.5 pr-11 text-sm text-white outline-none transition placeholder:text-white/15 focus:border-[#62C58C]/30 focus:ring-2 focus:ring-[#62C58C]/10"
+          autoComplete={autoComplete}
+          disabled={loading}
           placeholder="••••••••"
+          className="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.035] pl-11 pr-12 text-sm text-white outline-none transition placeholder:text-white/15 focus:border-[#55B981]/40 focus:bg-white/[0.05] disabled:opacity-50"
         />
 
         <button
           type="button"
           onClick={onToggle}
-          className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center text-white/20 transition hover:text-white/50"
-          aria-label={visible ? "Hide password" : "Show password"}
+          disabled={loading}
+          className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-white/25 transition hover:bg-white/[0.05] hover:text-white/60 disabled:pointer-events-none disabled:opacity-40"
+          aria-label={show ? "Hide password" : "Show password"}
         >
-          {visible ? <EyeOff size={15} /> : <Eye size={15} />}
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       </div>
     </div>

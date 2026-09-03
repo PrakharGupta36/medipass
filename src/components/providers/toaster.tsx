@@ -25,25 +25,13 @@ export function AppToaster() {
   return (
     <Toaster
       position={position}
-      theme="dark"
-      richColors
       closeButton
-      expand={false}
-      visibleToasts={3}
-      duration={4000}
       toastOptions={{
         classNames: {
-          toast: "medipass-toast",
-          title: "medipass-toast-title",
-          description: "medipass-toast-description",
-          closeButton: "medipass-toast-close",
-          success: "medipass-toast-success",
-          error: "medipass-toast-error",
-          warning: "medipass-toast-warning",
-          info: "medipass-toast-info",
-          loading: "medipass-toast-loading",
-          actionButton: "medipass-toast-action",
-          cancelButton: "medipass-toast-cancel",
+          toast:
+            "border-white/[0.08] bg-[#111712] text-white shadow-[0_20px_60px_rgba(0,0,0,0.4)]",
+          title: "text-sm font-semibold",
+          description: "text-xs text-white/45",
         },
       }}
     />

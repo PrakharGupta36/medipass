@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { AppToaster } from "@/components/providers/toaster";
 import "./globals.css";
+import CuelumeProvider from "@/components/providers/cuelume-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-[#080D0A]">
+        <CuelumeProvider />
         {children}
         <AppToaster />
       </body>

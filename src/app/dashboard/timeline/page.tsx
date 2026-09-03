@@ -120,15 +120,7 @@ export default async function TimelinePage() {
   return (
     <div>
       {/* Mobile heading */}
-      <div className="mb-7 lg:hidden">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#62C58C]">
-          Timeline
-        </p>
-
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-          Medical timeline
-        </h1>
-      </div>
+      
 
       <section className="rounded-[26px] border border-white/[0.07] bg-[#111712]">
         <div className="border-b border-white/[0.06] px-6 py-5">

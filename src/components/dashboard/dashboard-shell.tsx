@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-import DashboardHeader from "@/components/dashboard/dashboard-header";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
 import MobileNav from "@/components/dashboard/mobile-nav";
 
@@ -30,8 +29,6 @@ export default async function DashboardShell({
       <DashboardSidebar name={name} email={email} />
 
       <div className="lg:pl-[250px]">
-        <DashboardHeader name={name} />
-
         <div className="mx-auto w-full max-w-[1400px] px-5 pb-32 pt-6 sm:px-7 md:px-8 lg:px-8 lg:pb-10 xl:px-10">
           {children}
         </div>

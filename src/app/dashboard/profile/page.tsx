@@ -43,13 +43,7 @@ export default async function ProfilePage() {
   return (
     <div>
       {/* Mobile heading */}
-      <div className="mb-7 lg:hidden">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#62C58C]">
-          Account
-        </p>
-
-        <h1 className="mt-1 text-2xl font-semibold">Your profile</h1>
-      </div>
+      
 
       <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
         {/* Identity */}

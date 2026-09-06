@@ -1,11 +1,18 @@
-/* eslint-disable react-hooks/purity */
 "use client";
 
 import { DoubleBorderCard } from "@/components/ui/double-border-card";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Clock3, History, ShieldAlert, X } from "lucide-react";
-import { useState } from "react";
-
+import {
+  AlertCircle,
+  Check,
+  ChevronRight,
+  Clock3,
+  History,
+  Loader2,
+  ShieldAlert,
+  X,
+} from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
 import { revokeShareSession } from "./actions";
 
 type Session = {
@@ -19,264 +26,276 @@ type Session = {
 const microSpring = {
   type: "spring" as const,
   stiffness: 500,
-  damping: 30,
-};
-
-const modalSpring = {
-  type: "spring" as const,
-  stiffness: 400,
-  damping: 28,
+  damping: 32,
 };
 
 export default function RecentShares({ sessions }: { sessions: Session[] }) {
   const [open, setOpen] = useState(false);
+  const [now] = useState(() => Date.now());
+
+  const getStatus = (session: Session, currentTime: number) => {
+    if (session.revoked_at) return "Revoked";
+    if (new Date(session.expires_at).getTime() > currentTime) return "Active";
+    return "Expired";
+  };
 
   if (!sessions.length) return null;
 
   const latest = sessions[0];
-
-  const getStatus = (session: Session) => {
-    if (session.revoked_at) return "Revoked";
-    if (new Date(session.expires_at).getTime() > Date.now()) return "Active";
-    return "Expired";
-  };
-
-  const status = getStatus(latest);
+  const status = getStatus(latest, now);
   const remainingCount = sessions.length - 1;
 
   return (
     <>
       <DoubleBorderCard
         variant="light"
-        className="flex h-full flex-col justify-between p-3 sm:p-4"
+        className="w-full  p-3.5 sm:p-5"
       >
-        <div>
-          <div className="flex flex-wrap flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-black/5 pb-2.5">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <History size={14} className="shrink-0 text-[#18392B]" />
-                <h2 className="truncate font-serif text-xl font-normal leading-tight tracking-tight text-[#121312] sm:text-base">
+        <div className="w-full">
+          {/* Header Section */}
+          <div className="flex flex-col justify-between sm:flex-row gap-4 border-b border-black/10 pb-5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-black/5 bg-[#E6E0D6] text-[#18392B]">
+                <History size={15} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="truncate font-serif text-2xl font-semibold leading-tight text-[#121312] sm:text-lg">
                   Recent Shares
                 </h2>
-              </div>
-              <p className="truncate font-mono text-xs font-medium uppercase leading-tight tracking-widest text-[#121312]/45">
-                Latest temporary access logs
-              </p>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              type="button"
-              onClick={() => setOpen(true)}
-              className="flex h-7 shrink-0 items-center gap-1 rounded-lg border border-black/10 bg-gradient-to-b from-white to-[#F3EFE9] px-2 font-mono text-[10px] font-semibold text-[#121312] shadow-sm transition hover:border-black/20 sm:px-2.5 sm:text-[11px] w-full "
-            >
-              <History size={12} className="shrink-0" />
-              <span className="whitespace-nowrap text-xs">Full History</span>
-            </motion.button>
-          </div>
-
-          <div className="mt-3 rounded-lg border border-black/10 bg-gradient-to-b from-[#EAE4DA] to-[#E0D9CE] p-2.5 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.05)_inset] sm:p-3">
-            <div className="flex items-center gap-2.5">
-              <div
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border shadow-sm transition-colors ${
-                  status === "Active"
-                    ? "border-[#18392B]/30 bg-[#18392B] text-white"
-                    : "border-black/10 bg-[#D8D1C5] text-[#121312]/50"
-                }`}
-              >
-                {status === "Active" ? (
-                  <Check size={13} strokeWidth={2.5} />
-                ) : (
-                  <Clock3 size={13} />
-                )}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-[13px] font-semibold leading-tight tracking-tight text-[#121312]">
-                    {status}
-                  </p>
-                  {status === "Active" && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.6)]" />
-                  )}
-                </div>
-                <p className="font-mono text-[11px] leading-tight tabular-nums text-[#121312]/60">
-                  {formatDate(latest.created_at)}
+                <p className="truncate font-mono text-xs  font-medium uppercase tracking-wider text-[#121312]/50">
+                  Latest access logs
                 </p>
               </div>
+            </div>
 
-              <span className="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-widest text-[#121312]/45 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-black/10 bg-white px-2.5 font-mono text-[11px] font-semibold text-[#121312] shadow-2xs transition hover:bg-gray-50 active:scale-[0.98]"
+            >
+              <History size={12} className="text-[#121312]/60" />
+              <span className="text-xs">Full History</span>
+            </button>
+          </div>
+
+          {/* Latest Session Inset Box */}
+          <div className="mt-4 rounded-xl border border-black/5 bg-[#EAE4DA]/50 p-3 shadow-[inset_0_1px_3px_rgba(0,0,0,0.04)] sm:p-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs transition-all ${
+                    status === "Active"
+                      ? "border border-[#18392B]/20 bg-[#18392B] text-white"
+                      : status === "Revoked"
+                        ? "border border-red-200 bg-red-100 text-red-700"
+                        : "border border-black/10 bg-[#D8D1C5] text-[#121312]/50"
+                  }`}
+                >
+                  {status === "Active" ? (
+                    <Check size={13} strokeWidth={2.5} />
+                  ) : status === "Revoked" ? (
+                    <ShieldAlert size={13} />
+                  ) : (
+                    <Clock3 size={13} />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[#121312]">
+                      {status}
+                    </p>
+                    {status === "Active" && (
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#18392B]" />
+                      </span>
+                    )}
+                  </div>
+                  <p className="truncate font-mono text-[10px] text-[#121312]/60">
+                    Issued {formatDate(latest.created_at)}
+                  </p>
+                </div>
+              </div>
+
+              <span className="shrink-0 rounded-md border border-black/5 bg-white px-2 py-0.5 font-mono text-[8px] font-bold tracking-widest text-[#121312]/50 shadow-2xs">
                 LATEST
               </span>
             </div>
 
-            <div className="mt-2 flex items-center justify-between border-t border-black/5 pt-1.5 font-mono text-[11px]">
-              <span className="tabular-nums text-[#121312]/60">
+            {/* Inset Footer - Responsive Flex Wrap */}
+            <div className="mt-2.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-black/5 pt-2 font-mono text-[10px]">
+              <span className="truncate text-[#121312]/60">
                 {status === "Active"
                   ? `Expires ${formatDate(latest.expires_at)}`
-                  : "Access Ended"}
+                  : "Access Terminated"}
               </span>
 
-              <span className="font-semibold uppercase tracking-widest text-[#121312]/45 tabular-nums">
-                {getPermissionCount(latest.permissions)} Categories
+              <span className="shrink-0 font-semibold uppercase tracking-wider text-[#121312]/50">
+                {getPermissionCount(latest.permissions)} Categories Unsealed
               </span>
             </div>
           </div>
         </div>
 
         {remainingCount > 0 && (
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             type="button"
             onClick={() => setOpen(true)}
-            className="mt-3 w-full text-center font-mono text-[11px] font-semibold tabular-nums text-[#121312]/60 transition hover:text-[#18392B]"
+            className="group mt-2.5 flex w-full items-center justify-center gap-1 rounded-lg border border-black/5 bg-white/60 py-2 font-mono text-[11px] font-semibold text-[#121312]/70 transition hover:bg-white hover:text-[#18392B] active:scale-[0.99]"
           >
-            + {remainingCount} Previous{" "}
-            {remainingCount === 1 ? "Session" : "Sessions"}
-          </motion.button>
+            <span>
+              + {remainingCount} Previous{" "}
+              {remainingCount === 1 ? "Session" : "Sessions"}
+            </span>
+            <ChevronRight
+              size={12}
+              className="text-[#121312]/40 transition-transform group-hover:translate-x-0.5 group-hover:text-[#18392B]"
+            />
+          </button>
         )}
       </DoubleBorderCard>
 
+      {/* history modal */}
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#121312]/50 p-3 backdrop-blur-sm sm:p-4"
-            onMouseDown={(e) => {
-              if (e.target === e.currentTarget) setOpen(false);
-            }}
-          >
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 8 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 8 }}
-              transition={modalSpring}
-              className="w-full max-w-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(false)}
+              className="absolute inset-0 bg-[#121312]/60 backdrop-blur-xs"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ type: "spring", stiffness: 420, damping: 30 }}
+              className="relative z-10 flex h-full max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-[#F8F6F0] shadow-2xl ring-1 ring-black/10"
             >
-              <DoubleBorderCard
-                variant="light"
-                className="flex max-h-[80vh] flex-col overflow-hidden p-0 shadow-2xl sm:max-h-[75vh]"
-              >
-                <div className="flex shrink-0 items-center justify-between border-b border-black/10 bg-gradient-to-b from-white to-[#F8F6F0] px-3.5 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/5 bg-[#E6E0D6] text-[#18392B]">
-                      <History size={14} />
-                    </div>
-
-                    <div>
-                      <h3 className="font-serif text-sm font-normal leading-tight tracking-tight text-[#121312] sm:text-base">
-                        Share History Log
-                      </h3>
-                      <p className="font-mono text-[9px] font-medium uppercase leading-tight tracking-widest text-[#121312]/45 tabular-nums">
-                        {sessions.length}{" "}
-                        {sessions.length === 1 ? "Session" : "Sessions"} Total
-                      </p>
-                    </div>
+              <div className="flex shrink-0 items-center justify-between border-b border-black/10 bg-white px-4 py-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/5 bg-[#E6E0D6] text-[#18392B]">
+                    <History size={14} />
                   </div>
-
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={() => setOpen(false)}
-                    className="flex h-6 w-6 items-center justify-center rounded-lg border border-black/10 bg-[#F3EFE9] text-[#121312]/60 transition hover:bg-[#121312] hover:text-white sm:h-7 sm:w-7"
-                    aria-label="Close share history"
-                  >
-                    <X size={13} />
-                  </motion.button>
-                </div>
-
-                <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8F6F0]/40 p-3 [scrollbar-width:thin]">
-                  <div className="space-y-1.5">
-                    {sessions.map((session) => {
-                      const sessionStatus = getStatus(session);
-
-                      return (
-                        <motion.div
-                          key={session.id}
-                          layout
-                          transition={microSpring}
-                          className="rounded-lg border border-black/10 bg-gradient-to-b from-white to-[#F8F6F0] p-2.5 shadow-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border shadow-sm transition-colors ${
-                                sessionStatus === "Active"
-                                  ? "border-[#18392B]/30 bg-[#18392B] text-white"
-                                  : sessionStatus === "Revoked"
-                                    ? "border-red-300 bg-red-600 text-white"
-                                    : "border-black/10 bg-[#E6E0D6] text-[#121312]/40"
-                              }`}
-                            >
-                              {sessionStatus === "Active" ? (
-                                <Check size={12} strokeWidth={2.5} />
-                              ) : sessionStatus === "Revoked" ? (
-                                <ShieldAlert size={12} />
-                              ) : (
-                                <Clock3 size={12} />
-                              )}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5">
-                                <p className="text-[11px] font-semibold leading-tight text-[#121312]">
-                                  {sessionStatus}
-                                </p>
-                                {sessionStatus === "Active" && (
-                                  <span className="h-1.5 w-1.5 rounded-full bg-[#18392B]" />
-                                )}
-                              </div>
-                              <p className="font-mono text-[9px] font-medium leading-tight text-[#121312]/50 tabular-nums">
-                                Created {formatDate(session.created_at)}
-                              </p>
-                            </div>
-
-                            {!session.revoked_at &&
-                              new Date(session.expires_at).getTime() >
-                                Date.now() && (
-                                <form
-                                  action={() => revokeShareSession(session.id)}
-                                >
-                                  <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    type="submit"
-                                    className="rounded-md border border-red-300 bg-red-50 px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-widest text-red-700 transition hover:bg-red-600 hover:text-white"
-                                  >
-                                    Revoke
-                                  </motion.button>
-                                </form>
-                              )}
-                          </div>
-
-                          <div className="mt-1.5 flex items-center justify-between border-t border-black/5 pt-1.5 font-mono text-[9px]">
-                            <span className="font-semibold text-[#121312]/60 tabular-nums">
-                              {getPermissionCount(session.permissions)}{" "}
-                              Categories
-                            </span>
-
-                            <span className="font-bold uppercase tracking-widest text-[#121312]/40 tabular-nums">
-                              {sessionStatus === "Active"
-                                ? `Expires ${formatDate(session.expires_at)}`
-                                : sessionStatus.toUpperCase()}
-                            </span>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+                  <div>
+                    <h3 className="font-serif text-base font-semibold text-[#121312]">
+                      Share History Log
+                    </h3>
+                    <p className="font-mono text-[9px] font-medium uppercase tracking-wider text-[#121312]/50">
+                      {sessions.length}{" "}
+                      {sessions.length === 1 ? "Session" : "Sessions"} Recorded
+                    </p>
                   </div>
                 </div>
-              </DoubleBorderCard>
+
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/10 bg-[#F3EFE9] text-[#121312]/60 transition hover:bg-[#121312] hover:text-white"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-3 space-y-2 [scrollbar-width:thin]">
+                {sessions.map((session) => (
+                  <SessionRow key={session.id} session={session} now={now} />
+                ))}
+              </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+function SessionRow({ session, now }: { session: Session; now: number }) {
+  const [isPending, startTransition] = useTransition();
+
+  const sessionStatus = useMemo(() => {
+    if (session.revoked_at) return "Revoked";
+    if (new Date(session.expires_at).getTime() > now) return "Active";
+    return "Expired";
+  }, [session.revoked_at, session.expires_at, now]);
+
+  const isActive = sessionStatus === "Active";
+
+  const handleRevoke = () => {
+    startTransition(async () => {
+      await revokeShareSession(session.id);
+    });
+  };
+
+  return (
+    <motion.div
+      layout
+      transition={microSpring}
+      className={`rounded-xl border bg-white p-2.5 shadow-2xs transition-colors ${
+        isActive ? "border-[#18392B]/30" : "border-black/5"
+      }`}
+    >
+      <div className="flex items-center gap-2.5">
+        <div
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors ${
+            sessionStatus === "Active"
+              ? "bg-[#18392B] text-white"
+              : sessionStatus === "Revoked"
+                ? "bg-red-600 text-white"
+                : "border border-black/10 bg-[#E6E0D6] text-[#121312]/40"
+          }`}
+        >
+          {sessionStatus === "Active" ? (
+            <Check size={12} strokeWidth={2.5} />
+          ) : sessionStatus === "Revoked" ? (
+            <AlertCircle size={12} />
+          ) : (
+            <Clock3 size={12} />
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="text-xs font-bold text-[#121312]">{sessionStatus}</p>
+            {isActive && (
+              <span className="h-1.5 w-1.5 rounded-full bg-[#18392B]" />
+            )}
+          </div>
+          <p className="truncate font-mono text-[9px] text-[#121312]/50">
+            Created {formatDate(session.created_at)}
+          </p>
+        </div>
+
+        {isActive && (
+          <button
+            type="button"
+            onClick={handleRevoke}
+            disabled={isPending}
+            className="flex h-6 items-center gap-1 rounded-md border border-red-200 bg-red-50/80 px-2 font-mono text-[9px] font-bold uppercase tracking-wider text-red-700 transition hover:bg-red-600 hover:text-white disabled:opacity-50"
+          >
+            {isPending ? (
+              <Loader2 size={10} className="animate-spin" />
+            ) : (
+              <span>Revoke</span>
+            )}
+          </button>
+        )}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between border-t border-black/5 pt-1.5 font-mono text-[9px]">
+        <span className="font-medium text-[#121312]/60">
+          {getPermissionCount(session.permissions)} Categories Authorized
+        </span>
+        <span className="font-bold uppercase tracking-wider text-[#121312]/40">
+          {sessionStatus === "Active"
+            ? `Expires ${formatDate(session.expires_at)}`
+            : sessionStatus.toUpperCase()}
+        </span>
+      </div>
+    </motion.div>
   );
 }
 

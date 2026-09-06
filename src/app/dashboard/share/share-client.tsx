@@ -1,5 +1,4 @@
-// src/app/dashboard/share/share-client.tsx
-
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { DoubleBorderCard } from "@/components/ui/double-border-card";
@@ -22,7 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { createShareSession } from "./actions";
 import RecentShares from "./recent-shares";
 
@@ -34,7 +33,6 @@ type Session = {
   permissions: Record<string, boolean>;
 };
 
-// Fluid Spring Configuration
 const springPhysics = {
   type: "spring" as const,
   stiffness: 380,
@@ -54,6 +52,7 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   const [permissions, setPermissions] = useState({
     basic_profile: true,
@@ -64,7 +63,10 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
     reports: false,
   });
 
-  // 3D Card Tilt Effects
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+
   const cardRef = useRef<HTMLDivElement>(null);
   const x = useSpring(0, { stiffness: 200, damping: 20 });
   const y = useSpring(0, { stiffness: 200, damping: 20 });
@@ -72,19 +74,18 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
   const rotateY = useTransform(x, [-0.5, 0.5], [-8, 8]);
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (!cardRef.current) return;
+    if (isTouchDevice || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-    x.set(xPct);
-    y.set(yPct);
+    x.set(mouseX / width - 0.5);
+    y.set(mouseY / height - 0.5);
   }
 
   function handleMouseLeave() {
+    if (isTouchDevice) return;
     x.set(0);
     y.set(0);
   }
@@ -132,65 +133,59 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
   }
 
   return (
-    <div className="w-full text-[#121312]">
-      <div className="grid items-start gap-6 xl:grid-cols-2">
-        {/* =====================================================
-            LEFT — SKEUOMORPHIC PASS CREATOR & QR STAGE
-        ====================================================== */}
+    <div className="w-full text-[#121312] antialiased">
+      <div className="grid items-start gap-3 sm:gap-4 lg:grid-cols-2 lg:gap-5">
+        {/* LEFT — PASS CREATOR & QR STAGE */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springPhysics}
         >
-          <DoubleBorderCard variant="light" className="p-6 sm:p-8">
-            {/* Header */}
-            <div className="mb-6 border-b border-black/5 pb-4">
-              <div className="flex items-center gap-2">
+          <DoubleBorderCard variant="light" className="p-3.5 sm:p-5 lg:p-6">
+            <div className="mb-3 border-b border-black/5 pb-3 sm:mb-4">
+              <div className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.5)]" />
-                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#121312]/50">
+                <p className="font-mono text-[9px] font-semibold uppercase tracking-widest text-[#121312]/50">
                   Secure Sharing Protocol
                 </p>
               </div>
 
-              <h1 className="mt-1 font-serif text-2xl font-normal text-[#121312]">
+              <h1 className="mt-1 font-serif text-lg font-normal leading-tight tracking-tight text-[#121312] sm:text-xl">
                 Temporary Access Pass
               </h1>
 
-              <p className="mt-1 font-mono text-xs leading-relaxed text-[#121312]/60">
+              <p className="mt-1 font-sans text-[12px] leading-relaxed text-[#121312]/70 sm:text-[13px]">
                 Generate a time-bound QR code or access link. Vault items remain
                 encrypted; only explicitly selected permission categories are
                 unsealed.
               </p>
             </div>
 
-            {/* 3D Dynamic Interactive Skeuomorphic QR Vault */}
             <motion.div
               ref={cardRef}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               style={{
-                rotateX,
-                rotateY,
+                rotateX: isTouchDevice ? 0 : rotateX,
+                rotateY: isTouchDevice ? 0 : rotateY,
                 transformStyle: "preserve-3d",
               }}
-              className="relative flex flex-col items-center rounded-2xl border border-black/10 bg-gradient-to-b from-[#EAE4DA] to-[#E0D9CE] p-6 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_6px_rgba(0,0,0,0.06)_inset]"
+              className="relative flex flex-col items-center rounded-xl border border-black/10 bg-gradient-to-b from-[#EAE4DA] to-[#E0D9CE] p-3 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_6px_rgba(0,0,0,0.06)_inset] sm:p-4"
             >
-              {/* Sunken Physical Card Tray */}
               <motion.div
                 layout
                 transition={springPhysics}
-                className="relative flex h-56 w-56 items-center justify-center rounded-2xl border border-black/10 bg-white p-4 shadow-[0_2px_5px_rgba(0,0,0,0.08)_inset,0_1px_0_rgba(255,255,255,0.9)]"
+                className="relative flex aspect-square w-full max-w-[170px] items-center justify-center rounded-xl border border-black/10 bg-white p-3 shadow-[0_2px_5px_rgba(0,0,0,0.08)_inset,0_1px_0_rgba(255,255,255,0.9)] xs:max-w-[190px] sm:max-w-[210px] sm:p-4"
               >
                 <AnimatePresence mode="wait">
                   {pending ? (
-                    /* Loading State */
                     <motion.div
                       key="loading"
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={microSpring}
-                      className="flex flex-col items-center justify-center gap-3"
+                      className="flex flex-col items-center justify-center gap-2"
                     >
                       <motion.div
                         animate={{ rotate: 360 }}
@@ -199,32 +194,31 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                           duration: 1.2,
                           ease: "linear",
                         }}
-                        className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#18392B] border-t-transparent text-[#18392B]"
+                        className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#18392B] border-t-transparent text-[#18392B] sm:h-9 sm:w-9"
                       />
-                      <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#18392B]">
+                      <p className="font-mono text-[9px] font-bold uppercase tracking-widest text-[#18392B]">
                         Minting Vault Pass...
                       </p>
                     </motion.div>
                   ) : token ? (
-                    /* Active QR State */
                     <motion.div
                       key="qr-active"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={springPhysics}
-                      className="relative flex items-center justify-center"
+                      className="relative flex h-full w-full items-center justify-center p-1"
                     >
                       <QRCodeSVG
                         value={link}
                         size={180}
+                        style={{ width: "100%", height: "100%" }}
                         bgColor="#ffffff"
                         fgColor="#121312"
                         includeMargin
                       />
                     </motion.div>
                   ) : (
-                    /* Inactive QR State */
                     <motion.div
                       key="qr-empty"
                       initial={{ opacity: 0, scale: 0.95 }}
@@ -234,11 +228,10 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                       className="flex flex-col items-center justify-center text-center"
                     >
                       <QrCode
-                        size={130}
                         strokeWidth={1}
-                        className="text-[#121312]/20"
+                        className="h-16 w-16 text-[#121312]/20 sm:h-20 sm:w-20"
                       />
-                      <span className="mt-2 font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+                      <span className="mt-1.5 font-mono text-[9px] font-medium uppercase tracking-widest text-[#121312]/40">
                         Pass Unissued
                       </span>
                     </motion.div>
@@ -246,20 +239,18 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                 </AnimatePresence>
               </motion.div>
 
-              {/* Expiration Timer Banner */}
               <motion.div
                 layout
-                className="mt-4 flex items-center gap-2 rounded-lg border border-black/5 bg-white/60 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#121312]/70 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]"
+                className="mt-3 flex items-center gap-1.5 rounded-lg border border-black/5 bg-white/60 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#121312]/70 tabular-nums shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]"
               >
-                <Clock3 size={13} className="text-[#18392B]" />
+                <Clock3 size={12} className="text-[#18392B]" />
                 {expiresAt
                   ? `Expires ${new Date(expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
                   : "No active session"}
               </motion.div>
             </motion.div>
 
-            {/* Action CTAs */}
-            <div className="mt-5">
+            <div className="mt-3 sm:mt-4">
               <AnimatePresence mode="wait">
                 {token ? (
                   <motion.div
@@ -268,14 +259,13 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={springPhysics}
-                    className="grid gap-3 sm:grid-cols-2"
+                    className="grid grid-cols-2 gap-2 sm:gap-2.5"
                   >
-                    {/* Copy Link Button */}
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={copyLink}
-                      className="relative flex h-11 items-center justify-center gap-2 overflow-hidden rounded-xl border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_2px_4px_rgba(24,57,43,0.3)] transition"
+                      className="relative flex h-9 items-center justify-center gap-1.5 overflow-hidden rounded-xl border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] font-mono text-[10px] font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_2px_4px_rgba(24,57,43,0.3)] transition sm:h-10 sm:gap-2 sm:text-[11px]"
                     >
                       <AnimatePresence mode="wait">
                         {copied ? (
@@ -285,9 +275,9 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -20, opacity: 0 }}
                             transition={microSpring}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-1.5"
                           >
-                            <Check size={15} />
+                            <Check size={13} />
                             <span>Link Copied</span>
                           </motion.span>
                         ) : (
@@ -297,25 +287,24 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -20, opacity: 0 }}
                             transition={microSpring}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-1.5"
                           >
-                            <Copy size={15} />
+                            <Copy size={13} />
                             <span>Copy Link</span>
                           </motion.span>
                         )}
                       </AnimatePresence>
                     </motion.button>
 
-                    {/* Open View Link */}
                     <motion.a
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
                       href={link}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex h-11 items-center justify-center gap-2 rounded-xl border border-black/10 bg-gradient-to-b from-white to-[#F3EFE9] font-mono text-xs font-semibold uppercase tracking-wider text-[#121312] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_1px_3px_rgba(0,0,0,0.08)] transition hover:border-black/20"
+                      className="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-black/10 bg-gradient-to-b from-white to-[#F3EFE9] font-mono text-[10px] font-semibold uppercase tracking-wider text-[#121312] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_1px_3px_rgba(0,0,0,0.08)] transition hover:border-black/20 sm:h-10 sm:text-[11px]"
                     >
-                      <ExternalLink size={14} />
+                      <ExternalLink size={12} />
                       <span>Open View</span>
                     </motion.a>
                   </motion.div>
@@ -329,9 +318,9 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                     whileTap={{ scale: 0.98 }}
                     disabled={pending}
                     onClick={generate}
-                    className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_2px_4px_rgba(24,57,43,0.3)] transition disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] font-mono text-[10px] font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_2px_4px_rgba(24,57,43,0.3)] transition disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:text-[11px]"
                   >
-                    <Sparkles size={15} />
+                    <Sparkles size={13} />
                     <span>
                       {pending ? "Minting Pass…" : "Generate QR Pass"}
                     </span>
@@ -340,46 +329,49 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
               </AnimatePresence>
             </div>
 
-            {/* Skeuomorphic Duration Selector */}
-            <div className="mt-6 rounded-2xl border border-black/10 bg-[#E6E0D6] p-4 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_5px_rgba(0,0,0,0.06)_inset]">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/5 bg-white text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_1px_2px_rgba(0,0,0,0.05)]">
-                  <Clock3 size={16} />
+            {/* Duration Selector */}
+            <div className="mt-3 rounded-xl border border-black/10 bg-[#E6E0D6] p-2.5 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_5px_rgba(0,0,0,0.06)_inset] sm:mt-4 sm:p-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-black/5 bg-white text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_1px_2px_rgba(0,0,0,0.05)] sm:h-7 sm:w-7">
+                  <Clock3 size={13} />
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-[#121312]">
+                  <p className="text-[11px] font-semibold leading-tight text-[#121312]">
                     Access Duration
                   </p>
-                  <p className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/50">
+                  <p className="font-mono text-[8px] font-medium uppercase leading-tight tracking-widest text-[#121312]/45">
                     Automatic expiration timer
                   </p>
                 </div>
               </div>
 
-              {/* Sunken Sliding Pill Track */}
-              <div className="relative mt-3 grid grid-cols-3 gap-1 rounded-xl border border-black/10 bg-white p-1 shadow-[0_2px_4px_rgba(0,0,0,0.08)_inset]">
-                {["15 minutes", "1 hour", "24 hours"].map((item) => {
-                  const active = duration === item;
+              <div className="relative mt-2 grid grid-cols-3 gap-1 rounded-lg border border-black/10 bg-white p-1 shadow-[0_2px_4px_rgba(0,0,0,0.08)_inset]">
+                {[
+                  { label: "15 min", fullValue: "15 minutes" },
+                  { label: "1 hour", fullValue: "1 hour" },
+                  { label: "24 hours", fullValue: "24 hours" },
+                ].map(({ label, fullValue }) => {
+                  const active = duration === fullValue;
 
                   return (
                     <button
-                      key={item}
+                      key={fullValue}
                       type="button"
-                      onClick={() => setDuration(item)}
-                      className="relative z-10 py-1.5 font-mono text-xs font-semibold transition-colors"
+                      onClick={() => setDuration(fullValue)}
+                      className="relative z-10 flex min-h-[32px] items-center justify-center rounded-md px-1 py-1 text-center font-mono text-[10px] font-semibold leading-tight tabular-nums transition-colors sm:text-[11px]"
                       style={{
-                        color: active ? "#F8F6F0" : "rgba(18, 19, 18, 0.6)",
+                        color: active ? "#F8F6F0" : "rgba(18, 19, 18, 0.65)",
                       }}
                     >
                       {active && (
                         <motion.div
                           layoutId="activeDurationPill"
                           transition={springPhysics}
-                          className="absolute inset-0 z-[-1] rounded-lg border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] to-[#18392B] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_1px_3px_rgba(0,0,0,0.2)]"
+                          className="absolute inset-0 z-[-1] rounded-md border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] to-[#18392B] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_1px_3px_rgba(0,0,0,0.2)]"
                         />
                       )}
-                      {item}
+                      <span className="whitespace-nowrap">{label}</span>
                     </button>
                   );
                 })}
@@ -388,33 +380,30 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
           </DoubleBorderCard>
         </motion.div>
 
-        {/* =====================================================
-            RIGHT — SKEUOMORPHIC PERMISSIONS & HISTORY
-        ====================================================== */}
-        <section className="space-y-6">
-          {/* Shared Information Permissions Panel */}
+        {/* RIGHT — PERMISSIONS & RECENT SHARES */}
+        <section className="space-y-3 sm:space-y-4">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...springPhysics, delay: 0.1 }}
           >
-            <DoubleBorderCard variant="light" className="p-6 sm:p-8">
-              <div className="flex items-center gap-3 border-b border-black/5 pb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/5 bg-[#E6E0D6] text-[#18392B] shadow-[0_1px_2px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)]">
-                  <Lock size={18} />
+            <DoubleBorderCard variant="light" className="p-3.5 sm:p-5 lg:p-6">
+              <div className="flex items-center gap-2 border-b border-black/5 pb-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-black/5 bg-[#E6E0D6] text-[#18392B] shadow-[0_1px_2px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)] sm:h-9 sm:w-9">
+                  <Lock size={15} />
                 </div>
 
                 <div>
-                  <h2 className="font-serif text-lg font-normal text-[#121312]">
+                  <h2 className="font-serif text-sm font-normal leading-tight tracking-tight text-[#121312] sm:text-base">
                     Vault Scope Permissions
                   </h2>
-                  <p className="font-mono text-[9px] font-medium uppercase tracking-wider text-[#121312]/50">
+                  <p className="font-mono text-[8px] font-medium uppercase leading-tight tracking-widest text-[#121312]/45">
                     Explicitly toggle unsealed data categories
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 space-y-2">
+              <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
                 {[
                   ["basic_profile", "Basic Profile Data"],
                   ["allergies", "Allergies & Sensitivities"],
@@ -434,26 +423,25 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                       transition={{ ...microSpring, delay: idx * 0.03 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => toggle(key as keyof typeof permissions)}
-                      className="group flex w-full items-center justify-between rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F8F6F0] px-4 py-3 text-left shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_1px_3px_rgba(0,0,0,0.04)] transition hover:border-black/15 hover:shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_6px_rgba(0,0,0,0.06)]"
+                      className="group flex min-h-[40px] w-full items-center justify-between rounded-lg border border-black/5 bg-gradient-to-b from-white to-[#F8F6F0] px-3 py-2 text-left shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_1px_3px_rgba(0,0,0,0.04)] transition hover:border-black/15 hover:shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_6px_rgba(0,0,0,0.06)]"
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex min-w-0 items-center gap-2">
                         <ShieldCheck
-                          size={15}
-                          className={
+                          size={14}
+                          className={`shrink-0 ${
                             enabled ? "text-[#18392B]" : "text-[#121312]/30"
-                          }
+                          }`}
                         />
-                        <span className="font-mono text-xs font-semibold text-[#121312]">
+                        <span className="truncate font-mono text-[10px] font-semibold text-[#121312] sm:text-[11px]">
                           {label}
                         </span>
                       </div>
 
-                      {/* Tactile Skeuomorphic Toggle Indicator */}
                       <motion.span
                         layout
                         transition={microSpring}
                         className={[
-                          "flex h-5 w-5 items-center justify-center rounded-lg border transition-all",
+                          "flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-md border transition-all",
                           enabled
                             ? "border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] to-[#18392B] text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_1px_2px_rgba(0,0,0,0.2)]"
                             : "border-black/10 bg-[#E6E0D6] text-[#121312]/30 shadow-[0_1px_2px_rgba(0,0,0,0.08)_inset]",
@@ -468,7 +456,7 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                               exit={{ scale: 0 }}
                               transition={microSpring}
                             >
-                              <Check size={12} strokeWidth={2.5} />
+                              <Check size={11} strokeWidth={2.5} />
                             </motion.span>
                           ) : (
                             <motion.span
@@ -478,7 +466,7 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                               exit={{ scale: 0 }}
                               transition={microSpring}
                             >
-                              <X size={12} strokeWidth={2} />
+                              <X size={11} strokeWidth={2} />
                             </motion.span>
                           )}
                         </AnimatePresence>
@@ -490,7 +478,6 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
             </DoubleBorderCard>
           </motion.div>
 
-          {/* Recent Shares Log */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

@@ -63,22 +63,22 @@ export default async function TimelinePage() {
 
     switch (event.event_type) {
       case "allergy":
-        icon = <AlertTriangle size={16} />;
+        icon = <AlertTriangle size={15} />;
         break;
       case "medication":
-        icon = <Pill size={16} />;
+        icon = <Pill size={15} />;
         break;
       case "vaccination":
-        icon = <Syringe size={16} />;
+        icon = <Syringe size={15} />;
         break;
       case "condition":
-        icon = <HeartPulse size={16} />;
+        icon = <HeartPulse size={15} />;
         break;
       case "doctor_visit":
-        icon = <Stethoscope size={16} />;
+        icon = <Stethoscope size={15} />;
         break;
       default:
-        icon = <HeartPulse size={16} />;
+        icon = <HeartPulse size={15} />;
     }
 
     timeline.push({
@@ -96,7 +96,7 @@ export default async function TimelinePage() {
       date: report.report_date || report.created_at.slice(0, 10),
       title: report.title,
       description: report.report_type || "Medical report",
-      icon: <FileText size={16} />,
+      icon: <FileText size={15} />,
     });
   }
 
@@ -107,7 +107,7 @@ export default async function TimelinePage() {
       title: "MediPass Created",
       description:
         "Your security credentials and medical profile were generated.",
-      icon: <ShieldCheck size={16} />,
+      icon: <ShieldCheck size={15} />,
     });
   }
 
@@ -117,38 +117,38 @@ export default async function TimelinePage() {
     <div className="w-full max-w-[1200px] text-[#121312]">
       <DoubleBorderCard variant="light" className="w-full">
         {/* Header Section */}
-        <div className="flex items-center justify-between border-b border-black/5 pb-4">
+        <div className="flex items-center justify-between border-b border-black/5 pb-3.5 sm:pb-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.4)]" />
-              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#121312]/40">
+              <p className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-[#121312]/40 sm:text-[9px]">
                 Medical History
               </p>
             </div>
 
-            <h1 className="mt-1.5 font-serif text-3xl font-normal text-[#121312] sm:text-4xl">
+            <h1 className="mt-1 font-serif text-2xl font-normal text-[#121312] sm:mt-1.5 sm:text-4xl">
               Timeline Log
             </h1>
 
-            <p className="mt-1 max-w-xl font-mono text-xs text-[#121312]/60">
+            <p className="mt-1 max-w-xl font-mono text-[11px] text-[#121312]/60 sm:text-xs">
               Chronological log of diagnostic reports, prescriptions, and health
               updates.
             </p>
           </div>
 
-          <div className="relative hidden sm:flex h-4 w-4 items-center justify-center rounded-full bg-[#E0D9CE] shadow-[0_1px_2px_rgba(0,0,0,0.15)_inset,0_1px_0_rgba(255,255,255,0.8)]">
+          <div className="relative hidden h-4 w-4 items-center justify-center rounded-full bg-[#E0D9CE] shadow-[0_1px_2px_rgba(0,0,0,0.15)_inset,0_1px_0_rgba(255,255,255,0.8)] sm:flex">
             <div className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.6)]" />
           </div>
         </div>
 
         {/* Timeline Content */}
-        <div className="mt-6 rounded-2xl border border-black/5 bg-[#E6E0D6] p-4 sm:p-6 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.08)_inset]">
+        <div className="mt-4 rounded-2xl border border-black/5 bg-[#E6E0D6] p-2.5 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.08)_inset] sm:mt-6 sm:p-6">
           {timeline.length > 0 ? (
             <div className="relative">
               {/* Vertical Guide Rail */}
-              <div className="absolute bottom-6 left-[19px] top-6 w-[2px] rounded-full bg-gradient-to-b from-black/10 via-black/10 to-transparent shadow-[1px_0_0_rgba(255,255,255,0.8)]" />
+              <div className="absolute bottom-6 left-[17px] top-6 w-[2px] rounded-full bg-gradient-to-b from-black/10 via-black/10 to-transparent shadow-[1px_0_0_rgba(255,255,255,0.8)] sm:left-[21px]" />
 
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 {timeline.map((item, index) => (
                   <TimelineItem
                     key={item.id}
@@ -162,16 +162,17 @@ export default async function TimelinePage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] px-6 py-12 text-center shadow-[0_1px_0_rgba(255,255,255,1)_inset]">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-black/5 bg-[#E6E0D6] text-[#121312]/30 shadow-[0_1px_2px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)]">
-                <HeartPulse size={20} />
+            <div className="flex flex-col items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] px-4 py-8 text-center shadow-[0_1px_0_rgba(255,255,255,1)_inset] sm:px-6 sm:py-12">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-black/5 bg-[#E6E0D6] text-[#121312]/30 shadow-[0_1px_2px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)] sm:h-12 sm:w-12">
+                <HeartPulse size={18} className="sm:hidden" />
+                <HeartPulse size={20} className="hidden sm:block" />
               </div>
 
-              <h2 className="mt-4 font-serif text-lg font-normal text-[#121312]">
+              <h2 className="mt-3 font-serif text-base font-normal text-[#121312] sm:mt-4 sm:text-lg">
                 Your timeline is empty
               </h2>
 
-              <p className="mt-1 max-w-sm font-mono text-xs text-[#121312]/50">
+              <p className="mt-1 max-w-sm font-mono text-[11px] text-[#121312]/50 sm:text-xs">
                 Add allergies, medications, conditions, vaccinations, or medical
                 reports to view your historical logs.
               </p>
@@ -215,11 +216,11 @@ function TimelineItem({
   active?: boolean;
 }) {
   return (
-    <div className="group relative flex items-start gap-4 rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] p-3.5 shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.04)] transition-all">
+    <div className="group relative flex items-start gap-2.5 rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] p-3 shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.04)] transition-all sm:gap-4 sm:p-3.5">
       {/* Icon Node */}
-      <div className="relative z-10 p-0.5 rounded-xl bg-[#E6E0D6] shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset]">
+      <div className="relative z-10 shrink-0 rounded-xl bg-[#E6E0D6] p-0.5 shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset]">
         <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ${
+          className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-300 sm:h-9 sm:w-9 ${
             active
               ? "border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_2px_6px_rgba(24,57,43,0.3)]"
               : "border-black/5 bg-white text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,1)_inset]"
@@ -231,15 +232,17 @@ function TimelineItem({
 
       {/* Item Body */}
       <div className="min-w-0 flex-1 pt-0.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-          <p className="text-xs font-semibold text-[#121312]">{title}</p>
+        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+          <p className="font-sans text-xs font-semibold leading-snug text-[#121312] sm:text-sm">
+            {title}
+          </p>
 
-          <span className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+          <span className="shrink-0 font-mono text-[8px] uppercase tracking-wider text-[#121312]/40 sm:text-[9px]">
             {date}
           </span>
         </div>
 
-        <p className="mt-1 font-mono text-xs text-[#121312]/60 leading-relaxed">
+        <p className="mt-1 font-mono text-[11px] leading-relaxed text-[#121312]/60 sm:text-xs">
           {description}
         </p>
       </div>

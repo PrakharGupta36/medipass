@@ -1,5 +1,3 @@
-// src/app/dashboard/share/recent-shares.tsx
-
 /* eslint-disable react-hooks/purity */
 "use client";
 
@@ -50,94 +48,90 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
     <>
       <DoubleBorderCard
         variant="light"
-        className="flex h-full flex-col justify-between p-4 sm:p-5"
+        className="flex h-full flex-col justify-between p-3 sm:p-4"
       >
         <div>
-          {/* Header section with normalized font hierarchy */}
-          <div className="flex items-center justify-between border-b border-black/5 pb-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <History size={16} className="text-[#18392B]" />
-                <h2 className="font-serif text-lg font-normal tracking-tight text-[#121312]">
+          <div className="flex flex-wrap flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-black/5 pb-2.5">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <History size={14} className="shrink-0 text-[#18392B]" />
+                <h2 className="truncate font-serif text-xl font-normal leading-tight tracking-tight text-[#121312] sm:text-base">
                   Recent Shares
                 </h2>
               </div>
-              <p className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#121312]/50">
+              <p className="truncate font-mono text-xs font-medium uppercase leading-tight tracking-widest text-[#121312]/45">
                 Latest temporary access logs
               </p>
             </div>
 
-            {/* Normalized button font */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               type="button"
               onClick={() => setOpen(true)}
-              className="flex h-8 items-center gap-1.5 rounded-md border border-black/10 bg-gradient-to-b from-white to-[#F3EFE9] px-3 font-mono text-xs font-semibold text-[#121312] shadow-sm transition hover:border-black/20"
+              className="flex h-7 shrink-0 items-center gap-1 rounded-lg border border-black/10 bg-gradient-to-b from-white to-[#F3EFE9] px-2 font-mono text-[10px] font-semibold text-[#121312] shadow-sm transition hover:border-black/20 sm:px-2.5 sm:text-[11px] w-full "
             >
-              <History size={13} />
-              <span>Full History</span>
+              <History size={12} className="shrink-0" />
+              <span className="whitespace-nowrap text-xs">Full History</span>
             </motion.button>
           </div>
 
-          {/* Main Log Card */}
-          <div className="mt-4 rounded-xl border border-black/10 bg-gradient-to-b from-[#EAE4DA] to-[#E0D9CE] p-3.5 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.05)_inset]">
-            <div className="flex items-center gap-3">
+          <div className="mt-3 rounded-lg border border-black/10 bg-gradient-to-b from-[#EAE4DA] to-[#E0D9CE] p-2.5 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.05)_inset] sm:p-3">
+            <div className="flex items-center gap-2.5">
               <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border shadow-sm transition-colors ${
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border shadow-sm transition-colors ${
                   status === "Active"
                     ? "border-[#18392B]/30 bg-[#18392B] text-white"
                     : "border-black/10 bg-[#D8D1C5] text-[#121312]/50"
                 }`}
               >
                 {status === "Active" ? (
-                  <Check size={14} strokeWidth={2.5} />
+                  <Check size={13} strokeWidth={2.5} />
                 ) : (
-                  <Clock3 size={14} />
+                  <Clock3 size={13} />
                 )}
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-semibold text-[#121312]">
+                  <p className="text-[13px] font-semibold leading-tight tracking-tight text-[#121312]">
                     {status}
                   </p>
                   {status === "Active" && (
-                    <span className="h-2 w-2 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.6)]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.6)]" />
                   )}
                 </div>
-                <p className="font-mono text-xs text-[#121312]/60">
+                <p className="font-mono text-[11px] leading-tight tabular-nums text-[#121312]/60">
                   {formatDate(latest.created_at)}
                 </p>
               </div>
 
-              <span className="rounded-md bg-white/80 px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider text-[#121312]/50 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+              <span className="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-widest text-[#121312]/45 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
                 LATEST
               </span>
             </div>
 
-            <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-2 font-mono text-xs">
-              <span className="text-[#121312]/60">
+            <div className="mt-2 flex items-center justify-between border-t border-black/5 pt-1.5 font-mono text-[11px]">
+              <span className="tabular-nums text-[#121312]/60">
                 {status === "Active"
                   ? `Expires ${formatDate(latest.expires_at)}`
                   : "Access Ended"}
               </span>
 
-              <span className="font-semibold uppercase tracking-wider text-[#121312]/50">
+              <span className="font-semibold uppercase tracking-widest text-[#121312]/45 tabular-nums">
                 {getPermissionCount(latest.permissions)} Categories
               </span>
             </div>
           </div>
         </div>
 
-        {/* Scaled-down previous sessions link */}
         {remainingCount > 0 && (
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => setOpen(true)}
-            className="mt-4 w-full text-center font-mono text-xs font-semibold text-[#121312]/60 transition hover:text-[#18392B]"
+            className="mt-3 w-full text-center font-mono text-[11px] font-semibold tabular-nums text-[#121312]/60 transition hover:text-[#18392B]"
           >
             + {remainingCount} Previous{" "}
             {remainingCount === 1 ? "Session" : "Sessions"}
@@ -145,7 +139,6 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
         )}
       </DoubleBorderCard>
 
-      {/* History Modal */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -153,7 +146,7 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#121312]/50 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#121312]/50 p-3 backdrop-blur-sm sm:p-4"
             onMouseDown={(e) => {
               if (e.target === e.currentTarget) setOpen(false);
             }}
@@ -167,20 +160,19 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
             >
               <DoubleBorderCard
                 variant="light"
-                className="flex max-h-[75vh] flex-col overflow-hidden p-0 shadow-2xl"
+                className="flex max-h-[80vh] flex-col overflow-hidden p-0 shadow-2xl sm:max-h-[75vh]"
               >
-                {/* Modal Header */}
-                <div className="flex shrink-0 items-center justify-between border-b border-black/10 bg-gradient-to-b from-white to-[#F8F6F0] px-4 py-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/5 bg-[#E6E0D6] text-[#18392B]">
-                      <History size={16} />
+                <div className="flex shrink-0 items-center justify-between border-b border-black/10 bg-gradient-to-b from-white to-[#F8F6F0] px-3.5 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/5 bg-[#E6E0D6] text-[#18392B]">
+                      <History size={14} />
                     </div>
 
                     <div>
-                      <h3 className="font-serif text-base font-normal text-[#121312]">
+                      <h3 className="font-serif text-sm font-normal leading-tight tracking-tight text-[#121312] sm:text-base">
                         Share History Log
                       </h3>
-                      <p className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#121312]/50">
+                      <p className="font-mono text-[9px] font-medium uppercase leading-tight tracking-widest text-[#121312]/45 tabular-nums">
                         {sessions.length}{" "}
                         {sessions.length === 1 ? "Session" : "Sessions"} Total
                       </p>
@@ -192,16 +184,15 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
                     whileTap={{ scale: 0.95 }}
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/10 bg-[#F3EFE9] text-[#121312]/60 transition hover:bg-[#121312] hover:text-white"
+                    className="flex h-6 w-6 items-center justify-center rounded-lg border border-black/10 bg-[#F3EFE9] text-[#121312]/60 transition hover:bg-[#121312] hover:text-white sm:h-7 sm:w-7"
                     aria-label="Close share history"
                   >
-                    <X size={14} />
+                    <X size={13} />
                   </motion.button>
                 </div>
 
-                {/* Modal Session List */}
-                <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8F6F0]/40 p-3.5 [scrollbar-width:thin]">
-                  <div className="space-y-2">
+                <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8F6F0]/40 p-3 [scrollbar-width:thin]">
+                  <div className="space-y-1.5">
                     {sessions.map((session) => {
                       const sessionStatus = getStatus(session);
 
@@ -210,11 +201,11 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
                           key={session.id}
                           layout
                           transition={microSpring}
-                          className="rounded-xl border border-black/10 bg-gradient-to-b from-white to-[#F8F6F0] p-3 shadow-sm"
+                          className="rounded-lg border border-black/10 bg-gradient-to-b from-white to-[#F8F6F0] p-2.5 shadow-sm"
                         >
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-2">
                             <div
-                              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border shadow-sm transition-colors ${
+                              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border shadow-sm transition-colors ${
                                 sessionStatus === "Active"
                                   ? "border-[#18392B]/30 bg-[#18392B] text-white"
                                   : sessionStatus === "Revoked"
@@ -223,24 +214,24 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
                               }`}
                             >
                               {sessionStatus === "Active" ? (
-                                <Check size={13} strokeWidth={2.5} />
+                                <Check size={12} strokeWidth={2.5} />
                               ) : sessionStatus === "Revoked" ? (
-                                <ShieldAlert size={13} />
+                                <ShieldAlert size={12} />
                               ) : (
-                                <Clock3 size={13} />
+                                <Clock3 size={12} />
                               )}
                             </div>
 
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
-                                <p className="text-xs font-semibold text-[#121312]">
+                                <p className="text-[11px] font-semibold leading-tight text-[#121312]">
                                   {sessionStatus}
                                 </p>
                                 {sessionStatus === "Active" && (
                                   <span className="h-1.5 w-1.5 rounded-full bg-[#18392B]" />
                                 )}
                               </div>
-                              <p className="font-mono text-[10px] font-medium text-[#121312]/50">
+                              <p className="font-mono text-[9px] font-medium leading-tight text-[#121312]/50 tabular-nums">
                                 Created {formatDate(session.created_at)}
                               </p>
                             </div>
@@ -255,7 +246,7 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    className="rounded-md border border-red-300 bg-red-50 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-red-700 transition hover:bg-red-600 hover:text-white"
+                                    className="rounded-md border border-red-300 bg-red-50 px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-widest text-red-700 transition hover:bg-red-600 hover:text-white"
                                   >
                                     Revoke
                                   </motion.button>
@@ -263,13 +254,13 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
                               )}
                           </div>
 
-                          <div className="mt-2 flex items-center justify-between border-t border-black/5 pt-1.5 font-mono text-[10px]">
-                            <span className="font-semibold text-[#121312]/60">
+                          <div className="mt-1.5 flex items-center justify-between border-t border-black/5 pt-1.5 font-mono text-[9px]">
+                            <span className="font-semibold text-[#121312]/60 tabular-nums">
                               {getPermissionCount(session.permissions)}{" "}
                               Categories
                             </span>
 
-                            <span className="font-bold uppercase tracking-wider text-[#121312]/40">
+                            <span className="font-bold uppercase tracking-widest text-[#121312]/40 tabular-nums">
                               {sessionStatus === "Active"
                                 ? `Expires ${formatDate(session.expires_at)}`
                                 : sessionStatus.toUpperCase()}

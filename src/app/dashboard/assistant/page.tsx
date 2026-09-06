@@ -20,7 +20,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 // Fluid Awwwards-style Spring Physics
@@ -92,11 +92,20 @@ const suggestions = [
 ];
 
 export default function AssistantPage() {
+  const router = useRouter();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [recordDrawerOpen, setRecordDrawerOpen] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  function handleBack() {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/dashboard");
+    }
+  }
 
   function scrollToBottom() {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -127,7 +136,7 @@ export default function AssistantPage() {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `Based on your decrypted MediPass Vault records, your recent blood work from August 2026 shows optimal lipid levels and normal HbA1c (5.4%). Your active prescriptions remain updated with no noted adverse interactions.`,
+        content: `Based on your decrypted MediPass Vault records, your recent blood work shows optimal lipid levels and normal HbA1c (5.4%). Your active prescriptions remain updated with no noted adverse interactions.`,
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -155,7 +164,7 @@ export default function AssistantPage() {
     <main className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-[#F0EDE6] text-[#121312] selection:bg-[#18392B] selection:text-[#F0EDE6]">
       {/* Dynamic Ambient Grid Background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-1/3 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-[#18392B]/[0.035] blur-[100px] sm:h-[500px] sm:w-[500px] sm:blur-[120px]" />
+        <div className="absolute left-1/2 top-1/3 h-[250px] w-[250px] -translate-x-1/2 rounded-full bg-[#18392B]/[0.035] blur-[80px] sm:h-[500px] sm:w-[500px] sm:blur-[120px]" />
         <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -167,20 +176,20 @@ export default function AssistantPage() {
       </div>
 
       {/* ASSISTANT HEADER */}
-      <header className="relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-[#121312]/10 bg-[#F0EDE6]/80 px-3.5 backdrop-blur-xl sm:h-[72px] sm:px-6">
-        <div className="flex items-center gap-2.5 sm:gap-3.5">
-          {/* BACK TO DASHBOARD BUTTON */}
-          <Link href="/dashboard">
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-1.5 rounded-lg border border-[#121312]/10 bg-white/70 px-2.5 py-1.5 font-mono text-[10px] font-medium text-[#121312] shadow-2xs transition hover:bg-white sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs"
-            >
-              <ArrowLeft size={14} className="sm:hidden" />
-              <ArrowLeft size={16} className="hidden sm:block" />
-              <span className="hidden xs:inline">Dashboard</span>
-            </motion.div>
-          </Link>
+      <header className="relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-[#121312]/10 bg-[#F0EDE6]/80 px-3 sm:h-[72px] sm:px-6 backdrop-blur-xl">
+        <div className="flex items-center gap-2 sm:gap-3.5">
+          {/* DYNAMIC BACK BUTTON */}
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleBack}
+            type="button"
+            className="flex items-center gap-1.5 rounded-lg border border-[#121312]/10 bg-white/70 px-2.5 py-1.5 font-mono text-[10px] font-medium text-[#121312] shadow-2xs transition hover:bg-white sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs"
+          >
+            <ArrowLeft size={14} className="sm:hidden" />
+            <ArrowLeft size={16} className="hidden sm:block" />
+            <span className="hidden xs:inline">Back</span>
+          </motion.button>
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -219,7 +228,7 @@ export default function AssistantPage() {
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <section className="relative flex min-h-0 flex-1 flex-col justify-between overflow-hidden">
           {/* MESSAGES & EMPTY STATE CONTEXT */}
-          <div className="relative min-h-0 flex-1 overflow-y-auto px-3.5 py-4 sm:px-8 sm:py-6 lg:px-12">
+          <div className="relative min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-8 sm:py-6 lg:px-12">
             <AnimatePresence mode="wait">
               {messages.length === 0 ? (
                 /* EMPTY STATE SUITE */
@@ -229,19 +238,19 @@ export default function AssistantPage() {
                   initial="hidden"
                   animate="show"
                   exit={{ opacity: 0, scale: 0.98 }}
-                  className="mx-auto flex min-h-full max-w-4xl flex-col justify-center py-4 sm:py-6"
+                  className="mx-auto flex min-h-full max-w-4xl flex-col justify-center py-2 sm:py-6"
                 >
                   {/* AI MARK */}
                   <motion.div
                     variants={itemAnim}
-                    className="mb-3 flex justify-center sm:mb-5"
+                    className="mb-2 flex justify-center sm:mb-5"
                   >
-                    <div className="relative flex h-[60px] w-[60px] items-center justify-center sm:h-[76px] sm:w-[76px]">
-                      <div className="absolute inset-0 animate-pulse rounded-[20px] border border-[#18392B]/15 sm:rounded-[25px]" />
-                      <div className="absolute inset-[5px] rounded-[17px] border border-[#18392B]/10 sm:inset-[7px] sm:rounded-[21px]" />
-                      <div className="relative flex h-[40px] w-[40px] items-center justify-center rounded-[14px] bg-[#18392B] text-[#F0EDE6] shadow-[0_12px_35px_rgba(24,57,43,0.18)] sm:h-[48px] sm:w-[48px] sm:rounded-[16px]">
+                    <div className="relative flex h-[52px] w-[52px] items-center justify-center sm:h-[76px] sm:w-[76px]">
+                      <div className="absolute inset-0 animate-pulse rounded-[16px] border border-[#18392B]/15 sm:rounded-[25px]" />
+                      <div className="absolute inset-[4px] rounded-[14px] border border-[#18392B]/10 sm:inset-[7px] sm:rounded-[21px]" />
+                      <div className="relative flex h-[36px] w-[36px] items-center justify-center rounded-[12px] bg-[#18392B] text-[#F0EDE6] shadow-[0_12px_35px_rgba(24,57,43,0.18)] sm:h-[48px] sm:w-[48px] sm:rounded-[16px]">
                         <Sparkles
-                          size={18}
+                          size={16}
                           strokeWidth={1.5}
                           className="sm:hidden"
                         />
@@ -256,14 +265,14 @@ export default function AssistantPage() {
 
                   {/* TITLE */}
                   <motion.div variants={itemAnim} className="px-2 text-center">
-                    <p className="mb-1.5 font-mono text-[8px] font-semibold uppercase tracking-[0.22em] text-[#18392B]">
+                    <p className="mb-1 font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-[#18392B] sm:mb-1.5 sm:text-[9px]">
                       Sovereign Medical Intelligence
                     </p>
-                    <h2 className="font-serif text-[clamp(1.5rem,5vw,3.25rem)] leading-[1.1] tracking-[-0.035em]">
+                    <h2 className="font-serif text-[clamp(1.25rem,4.5vw,3rem)] leading-[1.1] tracking-[-0.035em]">
                       How can I query your
                       <br className="hidden xs:inline" /> encrypted record?
                     </h2>
-                    <p className="mx-auto mt-2.5 max-w-[520px] text-[11px] leading-5 text-[#121312]/60 sm:mt-4 sm:text-sm sm:leading-6">
+                    <p className="mx-auto mt-2 max-w-[520px] text-[11px] leading-relaxed text-[#121312]/60 sm:mt-4 sm:text-sm sm:leading-6">
                       Queries remain zero-knowledge, strictly referencing your
                       verified medical history, diagnostic reports, and current
                       prescriptions.
@@ -273,7 +282,7 @@ export default function AssistantPage() {
                   {/* SUGGESTIONS GRID */}
                   <motion.div
                     variants={containerStagger}
-                    className="mx-auto mt-6 grid w-full max-w-3xl gap-2.5 sm:mt-8 sm:grid-cols-2 sm:gap-3"
+                    className="mx-auto mt-4 grid w-full max-w-3xl gap-2 sm:mt-8 sm:grid-cols-2 sm:gap-3"
                   >
                     {suggestions.map((suggestion) => {
                       const Icon = suggestion.icon;
@@ -281,15 +290,15 @@ export default function AssistantPage() {
                         <motion.button
                           key={suggestion.title}
                           variants={itemAnim}
-                          whileHover={{ y: -3, scale: 1.01 }}
+                          whileHover={{ y: -2, scale: 1.005 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleSend(suggestion.prompt)}
                           type="button"
-                          className="group flex min-h-[64px] items-center gap-3 rounded-xl border border-[#121312]/10 bg-white/50 p-3 text-left shadow-xs backdrop-blur-sm transition-all hover:border-[#18392B]/20 hover:bg-white hover:shadow-[0_10px_30px_rgba(18,19,18,0.04)] sm:min-h-[72px] sm:rounded-2xl sm:p-4"
+                          className="group flex min-h-[56px] items-center gap-2.5 rounded-xl border border-[#121312]/10 bg-white/50 p-2.5 text-left shadow-xs backdrop-blur-sm transition-all hover:border-[#18392B]/20 hover:bg-white hover:shadow-[0_10px_30px_rgba(18,19,18,0.04)] sm:min-h-[72px] sm:gap-3 sm:rounded-2xl sm:p-4"
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#18392B]/[0.07] text-[#18392B] transition-colors group-hover:bg-[#18392B] group-hover:text-white sm:h-10 sm:w-10 sm:rounded-xl">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#18392B]/[0.07] text-[#18392B] transition-colors group-hover:bg-[#18392B] group-hover:text-white sm:h-10 sm:w-10 sm:rounded-xl">
                             <Icon
-                              size={16}
+                              size={15}
                               strokeWidth={1.7}
                               className="sm:hidden"
                             />
@@ -319,13 +328,13 @@ export default function AssistantPage() {
                   variants={containerStagger}
                   initial="hidden"
                   animate="show"
-                  className="mx-auto max-w-3xl space-y-4 pb-6 sm:space-y-6"
+                  className="mx-auto max-w-3xl space-y-3 pb-4 sm:space-y-6 sm:pb-6"
                 >
                   {messages.map((msg) => (
                     <motion.div
                       key={msg.id}
                       variants={itemAnim}
-                      className={`flex gap-2.5 sm:gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                      className={`flex gap-2 sm:gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       {msg.role === "assistant" && (
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#18392B] text-white shadow-xs sm:h-8 sm:w-8 sm:rounded-xl">
@@ -335,7 +344,7 @@ export default function AssistantPage() {
                       )}
 
                       <div
-                        className={`relative max-w-[90%] rounded-2xl p-3.5 sm:max-w-[85%] sm:p-5 ${
+                        className={`relative max-w-[88%] rounded-2xl p-3 sm:max-w-[85%] sm:p-5 ${
                           msg.role === "user"
                             ? "bg-[#18392B] text-[#F0EDE6] shadow-sm"
                             : "border border-[#121312]/10 bg-white/80 backdrop-blur-md shadow-xs"
@@ -347,11 +356,11 @@ export default function AssistantPage() {
 
                         {/* Citations Grounding Badge */}
                         {msg.citations && (
-                          <div className="mt-3 border-t border-[#121312]/10 pt-2.5 sm:mt-4 sm:pt-3">
+                          <div className="mt-2.5 border-t border-[#121312]/10 pt-2 sm:mt-4 sm:pt-3">
                             <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40">
                               Grounded In Vault Records:
                             </p>
-                            <div className="mt-1.5 flex flex-wrap gap-1 sm:mt-2 sm:gap-1.5">
+                            <div className="mt-1 flex flex-wrap gap-1 sm:mt-2 sm:gap-1.5">
                               {msg.citations.map((cite, i) => (
                                 <div
                                   key={i}
@@ -366,7 +375,7 @@ export default function AssistantPage() {
                         )}
 
                         <span
-                          className={`mt-1.5 block font-mono text-[8px] sm:mt-2 ${
+                          className={`mt-1 block font-mono text-[8px] sm:mt-2 ${
                             msg.role === "user"
                               ? "text-[#F0EDE6]/50 text-right"
                               : "text-[#121312]/30"
@@ -390,13 +399,13 @@ export default function AssistantPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-2.5 sm:gap-3"
+                      className="flex items-center gap-2 sm:gap-3"
                     >
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#18392B] text-white sm:h-8 sm:w-8 sm:rounded-xl">
                         <Bot size={14} className="sm:hidden" />
                         <Bot size={15} className="hidden sm:block" />
                       </div>
-                      <div className="flex items-center gap-1.5 rounded-2xl border border-[#121312]/10 bg-white px-3.5 py-2.5 shadow-xs sm:px-4 sm:py-3">
+                      <div className="flex items-center gap-1.5 rounded-2xl border border-[#121312]/10 bg-white px-3 py-2 shadow-xs sm:px-4 sm:py-3">
                         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#18392B]" />
                         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#18392B] [animation-delay:0.2s]" />
                         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#18392B] [animation-delay:0.4s]" />
@@ -410,7 +419,7 @@ export default function AssistantPage() {
           </div>
 
           {/* COMPOSER INPUT */}
-          <div className="relative shrink-0 border-t border-[#121312]/10 bg-[#F0EDE6]/90 p-3 backdrop-blur-xl sm:p-4">
+          <div className="relative shrink-0 border-t border-[#121312]/10 bg-[#F0EDE6]/90 p-2.5 backdrop-blur-xl sm:p-4">
             <div className="mx-auto max-w-3xl">
               <form
                 onSubmit={(e) => {
@@ -430,10 +439,10 @@ export default function AssistantPage() {
                     }}
                     placeholder="Ask about medical history, medications, or lab diagnostics..."
                     rows={2}
-                    className="block min-h-[52px] w-full resize-none bg-transparent px-3 pt-2.5 text-xs text-[#121312] outline-none placeholder:text-[#121312]/30 sm:min-h-[64px] sm:px-4 sm:pt-3.5 sm:text-sm"
+                    className="block min-h-[48px] w-full resize-none bg-transparent px-3 pt-2 text-xs text-[#121312] outline-none placeholder:text-[#121312]/30 sm:min-h-[64px] sm:px-4 sm:pt-3.5 sm:text-sm"
                   />
 
-                  <div className="flex items-center justify-between border-t border-[#121312]/5 px-2.5 py-1.5 sm:px-3 sm:py-2">
+                  <div className="flex items-center justify-between border-t border-[#121312]/5 px-2 py-1.5 sm:px-3 sm:py-2">
                     <div className="flex items-center gap-2">
                       <motion.button
                         whileHover={{ scale: 1.1 }}
@@ -476,7 +485,7 @@ export default function AssistantPage() {
                 </div>
               </form>
 
-              <div className="mt-1.5 flex items-center justify-center gap-1.5 font-mono text-[7px] uppercase tracking-wider text-[#121312]/30 sm:mt-2 sm:gap-2 sm:text-[8px]">
+              <div className="mt-1 flex items-center justify-center gap-1.5 font-mono text-[7px] uppercase tracking-wider text-[#121312]/30 sm:mt-2 sm:gap-2 sm:text-[8px]">
                 <span>Zero Knowledge AI</span>
                 <span>•</span>
                 <span>Not Medical Advice</span>
@@ -488,75 +497,86 @@ export default function AssistantPage() {
         {/* SIDE RECORD CONTEXT DRAWER */}
         <AnimatePresence>
           {recordDrawerOpen && (
-            <motion.aside
-              initial={{ x: "100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "100%", opacity: 0 }}
-              transition={springPhysics}
-              className="absolute right-0 top-0 z-30 h-full w-full border-l border-[#121312]/10 bg-white/95 p-5 shadow-2xl backdrop-blur-2xl sm:w-80 sm:p-6"
-            >
-              <div className="flex items-center justify-between border-b border-[#121312]/10 pb-4">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-[#18392B]" />
-                  <h3 className="font-serif text-sm font-semibold text-[#121312]">
-                    Active Record Scope
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setRecordDrawerOpen(false)}
-                  className="rounded-lg p-1 text-[#121312]/40 hover:bg-[#121312]/5 hover:text-[#121312]"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+            <>
+              {/* Overlay for mobile drawer dismissal */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setRecordDrawerOpen(false)}
+                className="absolute inset-0 z-20 bg-black/20 backdrop-blur-xs sm:hidden"
+              />
 
-              <div className="mt-5 space-y-3.5 sm:mt-6 sm:space-y-4">
-                <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40 sm:text-[9px]">
-                  Grounded Vault Categories
-                </p>
-
-                {[
-                  {
-                    label: "Lab Diagnostic Panel",
-                    count: "14 Records",
-                    status: "Active",
-                  },
-                  {
-                    label: "Prescription Index",
-                    count: "3 Medications",
-                    status: "Active",
-                  },
-                  {
-                    label: "Immunization History",
-                    count: "8 Vaccines",
-                    status: "Active",
-                  },
-                  {
-                    label: "Physician Consult Notes",
-                    count: "5 Briefs",
-                    status: "Active",
-                  },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between rounded-xl border border-[#121312]/10 bg-[#F0EDE6]/50 p-3"
-                  >
-                    <div>
-                      <p className="text-xs font-semibold text-[#121312]">
-                        {item.label}
-                      </p>
-                      <p className="font-mono text-[9px] text-[#121312]/40">
-                        {item.count}
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-[#18392B]/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-wider text-[#18392B]">
-                      {item.status}
-                    </span>
+              <motion.aside
+                initial={{ x: "100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "100%", opacity: 0 }}
+                transition={springPhysics}
+                className="absolute right-0 top-0 z-30 h-full w-[280px] border-l border-[#121312]/10 bg-white/95 p-4 shadow-2xl backdrop-blur-2xl sm:w-80 sm:p-6"
+              >
+                <div className="flex items-center justify-between border-b border-[#121312]/10 pb-3 sm:pb-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={15} className="text-[#18392B]" />
+                    <h3 className="font-serif text-xs font-semibold text-[#121312] sm:text-sm">
+                      Active Record Scope
+                    </h3>
                   </div>
-                ))}
-              </div>
-            </motion.aside>
+                  <button
+                    type="button"
+                    onClick={() => setRecordDrawerOpen(false)}
+                    className="rounded-lg p-1 text-[#121312]/40 hover:bg-[#121312]/5 hover:text-[#121312]"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-3 sm:mt-6 sm:space-y-4">
+                  <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40 sm:text-[9px]">
+                    Grounded Vault Categories
+                  </p>
+
+                  {[
+                    {
+                      label: "Lab Diagnostic Panel",
+                      count: "14 Records",
+                      status: "Active",
+                    },
+                    {
+                      label: "Prescription Index",
+                      count: "3 Medications",
+                      status: "Active",
+                    },
+                    {
+                      label: "Immunization History",
+                      count: "8 Vaccines",
+                      status: "Active",
+                    },
+                    {
+                      label: "Physician Consult Notes",
+                      count: "5 Briefs",
+                      status: "Active",
+                    },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between rounded-xl border border-[#121312]/10 bg-[#F0EDE6]/50 p-2.5 sm:p-3"
+                    >
+                      <div>
+                        <p className="text-[11px] font-semibold text-[#121312] sm:text-xs">
+                          {item.label}
+                        </p>
+                        <p className="font-mono text-[8px] text-[#121312]/40 sm:text-[9px]">
+                          {item.count}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-[#18392B]/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-wider text-[#18392B]">
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.aside>
+            </>
           )}
         </AnimatePresence>
       </div>

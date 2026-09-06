@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import {
   ArrowLeft,
   CalendarDays,
+  Check,
   CheckCircle2,
   ChevronDown,
   FileText,
@@ -16,6 +17,7 @@ import { useRef, useState } from "react";
 import { uploadMedicalReport } from "../actions";
 
 import { Calendar } from "@/components/ui/calendar";
+import { DoubleBorderCard } from "@/components/ui/double-border-card";
 import {
   Popover,
   PopoverContent,
@@ -56,225 +58,191 @@ export default function AddMedicalReportPage() {
 
     setFile(selectedFile);
 
-    /*
-     * Important:
-     *
-     * When a file is dragged onto the drop zone,
-     * we need to put that file into the actual
-     * <input type="file"> as well.
-     *
-     * Otherwise the React state knows about the file,
-     * but FormData won't contain it when the form submits.
-     */
     if (fileInputRef.current) {
       const dataTransfer = new DataTransfer();
-
       dataTransfer.items.add(selectedFile);
-
       fileInputRef.current.files = dataTransfer.files;
     }
   };
 
   const removeFile = () => {
     setFile(null);
-
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
   return (
-    <div className="relative w-full">
-      {/* Ambient background */}
-      <div className="pointer-events-none absolute -top-32 right-10 h-80 w-80 rounded-full bg-[#1F7A4F]/[0.035] blur-[120px]" />
-
-      {/* Back */}
-      <Link
-        href="/dashboard/health"
-        className="group inline-flex items-center gap-2 text-[10px] font-medium text-white/25 transition hover:text-white/60"
-      >
-        <ArrowLeft
-          size={14}
-          className="transition-transform group-hover:-translate-x-0.5"
-        />
-        Back to health
-      </Link>
-
-      {/* Page heading */}
-      <div className="mt-6 mb-8 flex items-start justify-between gap-8 lg:mb-9">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#62C58C] shadow-[0_0_8px_rgba(98,197,140,0.35)]" />
-
-            <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#62C58C]/60">
-              Medical records / 01
-            </span>
-          </div>
-
-          <h1 className="mt-3 text-[30px] font-semibold tracking-[-0.045em] text-white sm:text-[36px]">
-            Add a medical report
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-[11px] leading-5 text-white/25 sm:text-xs">
-            Store prescriptions, laboratory results, scans and other important
-            medical documents in your private medical record.
-          </p>
+    <div className="relative w-full max-w-[1200px] space-y-6 text-[#121312]">
+      {/* Back Button & Header */}
+      <div>
+        <div className="p-1 inline-block rounded-xl bg-[#E6E0D6] shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset]">
+          <Link
+            href="/dashboard/health"
+            className="group flex items-center gap-1.5 rounded-lg border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] px-3 py-1.5 font-mono text-xs font-semibold text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.05)] transition-all active:scale-[0.97]"
+          >
+            <ArrowLeft
+              size={14}
+              className="transition-transform duration-200 group-hover:-translate-x-0.5"
+            />
+            <span>Back to Health Records</span>
+          </Link>
         </div>
 
-        {/* Desktop icon */}
-        <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/[0.07] bg-[#111712] text-[#62C58C] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] lg:flex">
-          <FileText size={19} strokeWidth={1.7} />
-        </div>
+        <h1 className="mt-4 font-serif text-3xl font-normal text-[#121312] sm:text-4xl">
+          Add Medical Report
+        </h1>
+
+        <p className="mt-1 max-w-xl font-mono text-xs text-[#121312]/60">
+          Store prescriptions, laboratory results, scans, and other clinical
+          documents securely.
+        </p>
       </div>
 
-      {/* Main form card */}
-      <section className="relative w-full overflow-hidden rounded-[28px] border border-white/[0.07] bg-[#111712]/90 shadow-[0_24px_80px_rgba(0,0,0,0.2)] backdrop-blur-xl">
-        {/* Top reflection */}
-        <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
-
-        {/* Card header */}
-        <div className="border-b border-white/[0.055] px-5 py-5 sm:px-7 sm:py-6">
+      {/* Main Form Card */}
+      <DoubleBorderCard variant="light" className="w-full">
+        {/* Section Header */}
+        <div className="flex items-center justify-between border-b border-black/5 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#62C58C]/10 bg-[#1F7A4F]/10 text-[#62C58C]">
-              <FileText size={17} />
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold text-white/75">
-                Report details
-              </p>
-
-              <p className="mt-0.5 text-[9px] text-white/20">
-                Add information to identify this document later.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Form */}
-        <form
-          action={uploadMedicalReport}
-          className="space-y-7 p-5 sm:p-7 lg:p-8"
-        >
-          {/* ------------------------------------------ */}
-          {/* Report title */}
-          {/* ------------------------------------------ */}
-
-          <div>
-            <label
-              htmlFor="title"
-              className="mb-2 block font-mono text-[8px] uppercase tracking-[0.16em] text-white/25"
-            >
-              Report title
-            </label>
-
-            <input
-              id="title"
-              name="title"
-              required
-              placeholder="e.g. Complete Blood Count"
-              className="h-12 w-full rounded-xl border border-white/[0.07] bg-[#0B100D] px-4 text-xs text-white/75 outline-none transition placeholder:text-white/15 hover:border-white/[0.11] focus:border-[#62C58C]/30 focus:bg-[#0D130F] focus:ring-2 focus:ring-[#62C58C]/[0.07]"
-            />
-          </div>
-
-          {/* ------------------------------------------ */}
-          {/* Report type + date */}
-          {/* ------------------------------------------ */}
-
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {/* Report type */}
-            <div>
-              <label
-                htmlFor="report_type"
-                className="mb-2 block font-mono text-[8px] uppercase tracking-[0.16em] text-white/25"
-              >
-                Report type
-              </label>
-
-              <div className="relative">
-                <select
-                  id="report_type"
-                  name="report_type"
-                  defaultValue=""
-                  className="h-12 w-full appearance-none rounded-xl border border-white/[0.07] bg-[#0B100D] px-4 pr-11 text-xs text-white/60 outline-none transition hover:border-white/[0.11] focus:border-[#62C58C]/30 focus:bg-[#0D130F] focus:ring-2 focus:ring-[#62C58C]/[0.07]"
-                >
-                  <option value="">Select type</option>
-                  <option value="Lab report">Lab report</option>
-                  <option value="Prescription">Prescription</option>
-                  <option value="Imaging">Imaging</option>
-                  <option value="Discharge summary">Discharge summary</option>
-                  <option value="Doctor note">Doctor note</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <ChevronDown
-                  size={15}
-                  strokeWidth={1.7}
-                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/20"
-                />
+            <div className="p-1 rounded-2xl bg-[#E6E0D6] shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.08)_inset]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.05)]">
+                <FileText size={18} />
               </div>
             </div>
 
-            {/* Report date */}
             <div>
-              <label className="mb-2 block font-mono text-[8px] uppercase tracking-[0.16em] text-white/25">
-                Report date
-              </label>
-
-              {/* Value submitted to server */}
-              <input
-                type="hidden"
-                name="report_date"
-                value={date ? format(date, "yyyy-MM-dd") : ""}
-              />
-
-              <Popover>
-                {/* No asChild — compatible with your current Base UI shadcn */}
-                <PopoverTrigger
-                  type="button"
-                  className="flex h-12 w-full items-center justify-between rounded-xl border border-white/[0.07] bg-[#0B100D] px-4 text-left text-xs outline-none transition hover:border-white/[0.11] focus:border-[#62C58C]/30 focus:bg-[#0D130F] focus:ring-2 focus:ring-[#62C58C]/[0.07]"
-                >
-                  <span className={date ? "text-white/70" : "text-white/20"}>
-                    {date ? format(date, "dd MMMM yyyy") : "Select report date"}
-                  </span>
-
-                  <CalendarDays
-                    size={15}
-                    strokeWidth={1.7}
-                    className="shrink-0 text-white/20"
-                  />
-                </PopoverTrigger>
-
-                <PopoverContent
-                  align="start"
-                  className="w-auto border-white/[0.08] bg-[#111712] p-2 text-white shadow-2xl"
-                >
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={(day) => day > new Date()}
-                    
-                  />
-                </PopoverContent>
-              </Popover>
+              <h2 className="font-serif text-xl font-normal text-[#121312]">
+                Report Details
+              </h2>
+              <p className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+                Identify and attach your document
+              </p>
             </div>
           </div>
 
-          {/* ------------------------------------------ */}
-          {/* Document */}
-          {/* ------------------------------------------ */}
+          <div className="relative flex h-4 w-4 items-center justify-center rounded-full bg-[#E0D9CE] shadow-[0_1px_2px_rgba(0,0,0,0.15)_inset,0_1px_0_rgba(255,255,255,0.8)]">
+            <div className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.6)]" />
+          </div>
+        </div>
 
+        {/* Form Body */}
+        <form action={uploadMedicalReport} className="mt-6 space-y-5">
+          {/* Title Field */}
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label
-                htmlFor="file"
-                className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/25"
-              >
-                Document
-              </label>
+            <label className="block min-w-0">
+              <span className="ml-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/60">
+                Report Title
+              </span>
 
-              <span className="font-mono text-[8px] text-white/15">
+              <div className="mt-1 rounded-xl border border-black/10 bg-[#E8E2D8] p-1 shadow-[0_1.5px_3px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)] transition-all focus-within:border-[#18392B]/40 focus-within:ring-2 focus-within:ring-[#18392B]/15">
+                <input
+                  id="title"
+                  name="title"
+                  required
+                  placeholder="e.g. Complete Blood Count"
+                  className="h-9 w-full min-w-0 rounded-lg bg-white/80 px-3 font-mono text-xs text-[#121312] shadow-[0_1px_1px_rgba(0,0,0,0.05)_inset] outline-none transition-colors placeholder:text-[#121312]/30 focus:bg-white"
+                />
+              </div>
+            </label>
+          </div>
+
+          {/* Type & Date Grid */}
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            {/* Report Type Select */}
+            <div>
+              <label className="block min-w-0">
+                <span className="ml-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/60">
+                  Report Type
+                </span>
+
+                <div className="relative mt-1 rounded-xl border border-black/10 bg-[#E8E2D8] p-1 shadow-[0_1.5px_3px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)] transition-all focus-within:border-[#18392B]/40 focus-within:ring-2 focus-within:ring-[#18392B]/15">
+                  <select
+                    id="report_type"
+                    name="report_type"
+                    defaultValue=""
+                    className="h-9 w-full appearance-none rounded-lg bg-white/80 pl-3 pr-8 font-mono text-xs text-[#121312] shadow-[0_1px_1px_rgba(0,0,0,0.05)_inset] outline-none transition-colors focus:bg-white"
+                  >
+                    <option value="" disabled>
+                      Select type
+                    </option>
+                    <option value="Lab report">Lab report</option>
+                    <option value="Prescription">Prescription</option>
+                    <option value="Imaging">Imaging</option>
+                    <option value="Discharge summary">Discharge summary</option>
+                    <option value="Doctor note">Doctor note</option>
+                    <option value="Other">Other</option>
+                  </select>
+
+                  <ChevronDown
+                    size={15}
+                    strokeWidth={2}
+                    className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#121312]/40"
+                  />
+                </div>
+              </label>
+            </div>
+
+            {/* Report Date Picker */}
+            <div>
+              <label className="block min-w-0">
+                <span className="ml-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/60">
+                  Report Date
+                </span>
+
+                <input
+                  type="hidden"
+                  name="report_date"
+                  value={date ? format(date, "yyyy-MM-dd") : ""}
+                />
+
+                <div className="mt-1 rounded-xl border border-black/10 bg-[#E8E2D8] p-1 shadow-[0_1.5px_3px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)] transition-all focus-within:border-[#18392B]/40 focus-within:ring-2 focus-within:ring-[#18392B]/15">
+                  <Popover>
+                    <PopoverTrigger
+                      type="button"
+                      className="flex h-9 w-full items-center justify-between rounded-lg bg-white/80 px-3 font-mono text-xs text-[#121312] shadow-[0_1px_1px_rgba(0,0,0,0.05)_inset] outline-none transition-colors hover:bg-white"
+                    >
+                      <span
+                        className={
+                          date ? "text-[#121312]" : "text-[#121312]/30"
+                        }
+                      >
+                        {date
+                          ? format(date, "dd MMMM yyyy")
+                          : "Select report date"}
+                      </span>
+
+                      <CalendarDays
+                        size={15}
+                        strokeWidth={1.7}
+                        className="shrink-0 text-[#121312]/40"
+                      />
+                    </PopoverTrigger>
+
+                    <PopoverContent
+                      align="start"
+                      className="w-auto border-black/10 bg-[#F8F6F0] p-2 text-[#121312] shadow-xl"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        disabled={(day) => day > new Date()}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Document Dropzone */}
+          <div>
+            <div className="mb-1.5 flex items-center justify-between px-0.5">
+              <span className="font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/60">
+                Document File
+              </span>
+
+              <span className="font-mono text-[9px] text-[#121312]/40">
                 PDF / JPG / PNG / WEBP · MAX 10 MB
               </span>
             </div>
@@ -283,79 +251,69 @@ export default function AddMedicalReportPage() {
               onDragEnter={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
                 setDragActive(true);
               }}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
                 setDragActive(true);
               }}
               onDragLeave={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
                 setDragActive(false);
               }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-
                 setDragActive(false);
 
                 const droppedFile = e.dataTransfer.files?.[0];
-
-                if (droppedFile) {
-                  handleFile(droppedFile);
-                }
+                if (droppedFile) handleFile(droppedFile);
               }}
               className={[
-                "relative flex min-h-[230px] w-full overflow-hidden rounded-2xl border border-dashed transition",
+                "relative flex min-h-[200px] w-full overflow-hidden rounded-2xl border border-dashed p-2 transition-all",
                 dragActive
-                  ? "border-[#62C58C]/50 bg-[#1F7A4F]/10"
-                  : "border-white/[0.09] bg-[#0B100D]",
+                  ? "border-[#18392B] bg-[#18392B]/10"
+                  : "border-black/15 bg-[#E6E0D6] shadow-[0_1.5px_3px_rgba(0,0,0,0.08)_inset]",
               ].join(" ")}
             >
-              {/* Reflection */}
-              <div className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
               {!file ? (
-                /* Empty state */
+                /* Empty Upload State */
                 <label
                   htmlFor="file"
-                  className="group flex min-h-[230px] w-full cursor-pointer flex-col items-center justify-center px-5 text-center"
+                  className="group flex min-h-[184px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] px-5 text-center shadow-[0_1px_0_rgba(255,255,255,1)_inset]"
                 >
                   <div
                     className={[
-                      "flex h-14 w-14 items-center justify-center rounded-2xl border transition",
+                      "flex h-12 w-12 items-center justify-center rounded-xl border transition-all duration-200",
                       dragActive
-                        ? "border-[#62C58C]/25 bg-[#1F7A4F]/15 text-[#62C58C]"
-                        : "border-white/[0.06] bg-[#111712] text-[#62C58C]/80 group-hover:border-[#62C58C]/15 group-hover:bg-[#1F7A4F]/10",
+                        ? "border-[#18392B] bg-[#18392B] text-white"
+                        : "border-black/5 bg-[#E6E0D6] text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset] group-hover:scale-105",
                     ].join(" ")}
                   >
                     <Upload
-                      size={21}
-                      strokeWidth={1.7}
+                      size={20}
+                      strokeWidth={1.8}
                       className={dragActive ? "animate-bounce" : ""}
                     />
                   </div>
 
-                  <p className="mt-4 text-xs font-semibold text-white/60">
+                  <p className="mt-3 font-serif text-base font-normal text-[#121312]">
                     {dragActive
                       ? "Drop your document here"
                       : "Drag & drop your document"}
                   </p>
 
-                  <p className="mt-1 text-[10px] text-white/20">
+                  <p className="mt-0.5 font-mono text-[10px] text-[#121312]/50">
                     or click to browse from your device
                   </p>
 
-                  <div className="mt-4 flex items-center gap-1.5">
+                  <div className="mt-3 flex items-center gap-1.5">
                     {["PDF", "JPG", "PNG", "WEBP"].map((type) => (
                       <span
                         key={type}
-                        className="rounded-md border border-white/[0.06] bg-white/[0.025] px-2 py-1 font-mono text-[7px] text-white/20"
+                        className="rounded-md border border-black/5 bg-[#E6E0D6] px-2 py-0.5 font-mono text-[8px] font-semibold text-[#121312]/60 shadow-[0_1px_0_rgba(255,255,255,0.8)]"
                       >
                         {type}
                       </span>
@@ -363,27 +321,27 @@ export default function AddMedicalReportPage() {
                   </div>
                 </label>
               ) : (
-                /* Selected file */
-                <div className="flex min-h-[230px] w-full items-center justify-center p-5">
-                  <div className="flex w-full max-w-[600px] items-center gap-4 rounded-2xl border border-[#62C58C]/15 bg-[#102018] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#62C58C]/10 bg-[#1F7A4F]/10 text-[#62C58C]">
-                      <FileText size={19} />
+                /* Selected File State */
+                <div className="flex min-h-[184px] w-full items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] p-4 shadow-[0_1px_0_rgba(255,255,255,1)_inset]">
+                  <div className="flex w-full max-w-[500px] items-center gap-3.5 rounded-xl border border-black/5 bg-[#E6E0D6] p-3 shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-black/5 bg-white text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,1)_inset]">
+                      <FileText size={18} />
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-medium text-white/70">
+                      <p className="truncate text-xs font-semibold text-[#121312]">
                         {file.name}
                       </p>
 
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <span className="font-mono text-[8px] text-white/20">
+                      <div className="mt-1 flex items-center gap-2 font-mono text-[9px]">
+                        <span className="text-[#121312]/50">
                           {(file.size / 1024 / 1024).toFixed(2)} MB
                         </span>
 
-                        <span className="h-1 w-1 rounded-full bg-[#62C58C]/60" />
+                        <span className="h-1 w-1 rounded-full bg-[#18392B]" />
 
-                        <span className="flex items-center gap-1 text-[8px] text-[#62C58C]/70">
-                          <CheckCircle2 size={10} />
+                        <span className="flex items-center gap-1 font-semibold text-[#18392B]">
+                          <CheckCircle2 size={11} />
                           Ready to upload
                         </span>
                       </div>
@@ -392,7 +350,7 @@ export default function AddMedicalReportPage() {
                     <button
                       type="button"
                       onClick={removeFile}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.05] bg-white/[0.02] text-white/20 transition hover:border-white/[0.1] hover:bg-white/[0.05] hover:text-white/60"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-black/5 bg-white text-[#121312]/40 shadow-[0_1px_0_rgba(255,255,255,1)_inset] transition-all hover:bg-red-50 hover:text-red-600 active:scale-95"
                       aria-label="Remove file"
                     >
                       <X size={15} />
@@ -401,7 +359,6 @@ export default function AddMedicalReportPage() {
                 </div>
               )}
 
-              {/* Actual input ALWAYS stays mounted */}
               <input
                 ref={fileInputRef}
                 id="file"
@@ -417,55 +374,35 @@ export default function AddMedicalReportPage() {
             </div>
           </div>
 
-          {/* ------------------------------------------ */}
-          {/* Privacy */}
-          {/* ------------------------------------------ */}
-
-          <div className="relative overflow-hidden rounded-2xl border border-[#62C58C]/10 bg-[#0F1B14] p-4 sm:p-5">
-            <div className="pointer-events-none absolute right-0 top-0 h-28 w-28 rounded-full bg-[#62C58C]/[0.035] blur-3xl" />
-
-            <div className="relative">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#62C58C] shadow-[0_0_7px_rgba(98,197,140,0.4)]" />
-
-                <p className="text-[10px] font-semibold text-[#A7E1BE]">
-                  Private by default
-                </p>
-              </div>
-
-              <p className="mt-2 max-w-3xl text-[9px] leading-5 text-white/25">
-                This document belongs to your medical record. It remains private
-                unless you explicitly include it in a temporary MediPass sharing
-                session.
+          {/* Privacy Note */}
+          <div className="rounded-xl border border-black/5 bg-[#E6E0D6] p-3.5 shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset]">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.4)]" />
+              <p className="font-mono text-[9px] font-semibold uppercase tracking-wider text-[#18392B]">
+                Private & Encrypted
               </p>
             </div>
+
+            <p className="mt-1 font-mono text-[10px] leading-relaxed text-[#121312]/60">
+              This document belongs exclusively to your medical record. It
+              remains strictly private unless you explicitly share it.
+            </p>
           </div>
 
-          {/* ------------------------------------------ */}
-          {/* Submit */}
-          {/* ------------------------------------------ */}
-
-          <div className="flex flex-col-reverse gap-4 border-t border-white/[0.05] pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-white/15">
-                MediPass / Medical record
-              </p>
-
-              <p className="mt-1 text-[9px] text-white/15">
-                Your document is stored securely.
-              </p>
+          {/* Tactile Submit Button */}
+          <div className="pt-2">
+            <div className="p-1 rounded-xl bg-[#E6E0D6] shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset]">
+              <button
+                type="submit"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] px-4 font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_3px_8px_rgba(24,57,43,0.25)] transition-all active:scale-[0.98]"
+              >
+                <Check size={14} />
+                <span>Upload Report</span>
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#246B45] px-6 text-xs font-semibold text-white shadow-[0_8px_25px_rgba(36,107,69,0.18)] transition hover:bg-[#2C7D53] hover:shadow-[0_10px_30px_rgba(36,107,69,0.24)] active:scale-[0.99] sm:w-auto"
-            >
-              <Upload size={14} />
-              Upload report
-            </button>
           </div>
         </form>
-      </section>
+      </DoubleBorderCard>
     </div>
   );
 }

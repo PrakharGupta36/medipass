@@ -2,6 +2,8 @@
 
 "use client";
 
+import { playHoverSound, playSelectSound } from "@/lib/sounds";
+import { motion, type Transition } from "framer-motion";
 import {
   Activity,
   Bot,
@@ -13,139 +15,147 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, type Transition } from "framer-motion";
-import { playHoverSound, playSelectSound } from "@/lib/sounds";
 
 const springConfig: Transition = {
   type: "spring",
-  stiffness: 400,
-  damping: 30,
-  mass: 0.8,
+  stiffness: 550,
+  damping: 35,
+  mass: 0.5,
 };
 
 export default function MobileNav() {
   const pathname = usePathname();
 
+  // Hide mobile nav entirely on assistant route to avoid input collision
+  if (pathname.startsWith("/dashboard/assistant")) {
+    return null;
+  }
+
+  const triggerHaptic = (pattern: number | number[] = 8) => {
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(pattern);
+    }
+  };
+
   return (
-    <nav className="fixed inset-x-0 bottom-5 z-50 flex justify-center px-3 lg:hidden">
-      {/* Instagram-style rounded pill glass container */}
-      <div
-        className="
-        flex items-center gap-1.5 overflow-x-auto rounded-full
-        border border-white/40 bg-[#F0EDE6]/80 p-2
-        shadow-[0_12px_32px_rgba(18,19,18,0.12)]
-        backdrop-blur-xl backdrop-saturate-150
-        no-scrollbar max-w-full
-      "
-      >
-        {/* Dashboard */}
-        <MobileNavItem
-          href="/dashboard"
-          icon={<Home size={17} strokeWidth={2} />}
-          label="Dashboard"
-          active={pathname === "/dashboard"}
-        />
+    <nav className="fixed inset-x-0 bottom-0 z-50 lg:hidden">
+      {/* Compact Bottom Sheet */}
+      <div className="relative w-full rounded-t-[20px] border-t border-white/60 bg-[#F0EDE6]/80 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-8px_24px_rgba(18,19,18,0.1)] backdrop-blur-2xl backdrop-saturate-200">
+        {/* Tight Icon Track */}
+        <div className="no-scrollbar flex items-center justify-between gap-0.5 overflow-x-auto px-1">
+          <CompactNavItem
+            href="/dashboard"
+            icon={<Home size={16} strokeWidth={2.2} />}
+            label="Dashboard"
+            active={pathname === "/dashboard"}
+            onHaptic={() => triggerHaptic(8)}
+          />
 
-        {/* Health */}
-        <MobileNavItem
-          href="/dashboard/health"
-          icon={<Activity size={17} strokeWidth={2} />}
-          label="Health Records"
-          active={pathname.startsWith("/dashboard/health")}
-        />
+          <CompactNavItem
+            href="/dashboard/health"
+            icon={<Activity size={16} strokeWidth={2.2} />}
+            label="Health Records"
+            active={pathname.startsWith("/dashboard/health")}
+            onHaptic={() => triggerHaptic(8)}
+          />
 
-        {/* Timeline */}
-        <MobileNavItem
-          href="/dashboard/timeline"
-          icon={<FileText size={17} strokeWidth={2} />}
-          label="Timeline"
-          active={pathname.startsWith("/dashboard/timeline")}
-        />
+          <CompactNavItem
+            href="/dashboard/timeline"
+            icon={<FileText size={16} strokeWidth={2.2} />}
+            label="Timeline"
+            active={pathname.startsWith("/dashboard/timeline")}
+            onHaptic={() => triggerHaptic(8)}
+          />
 
-        {/* Experimental AI */}
-        <MobileNavItem
-          href="/dashboard/assistant"
-          icon={<Bot size={17} strokeWidth={2} />}
-          label="AI Assistant"
-          active={pathname.startsWith("/dashboard/assistant")}
-          experimental
-        />
+          <CompactNavItem
+            href="/dashboard/assistant"
+            icon={<Bot size={16} strokeWidth={2.2} />}
+            label="AI Assistant"
+            active={pathname.startsWith("/dashboard/assistant")}
+            experimental
+            onHaptic={() => triggerHaptic([8, 20, 8])}
+          />
 
-        {/* Share */}
-        <MobileNavItem
-          href="/dashboard/share"
-          icon={<QrCode size={17} strokeWidth={2} />}
-          label="Share Record"
-          active={pathname.startsWith("/dashboard/share")}
-        />
+          <CompactNavItem
+            href="/dashboard/share"
+            icon={<QrCode size={16} strokeWidth={2.2} />}
+            label="Share Record"
+            active={pathname.startsWith("/dashboard/share")}
+            onHaptic={() => triggerHaptic(8)}
+          />
 
-        {/* Profile */}
-        <MobileNavItem
-          href="/dashboard/profile"
-          icon={<UserRound size={17} strokeWidth={2} />}
-          label="Profile"
-          active={pathname.startsWith("/dashboard/profile")}
-        />
+          <CompactNavItem
+            href="/dashboard/profile"
+            icon={<UserRound size={16} strokeWidth={2.2} />}
+            label="Profile"
+            active={pathname.startsWith("/dashboard/profile")}
+            onHaptic={() => triggerHaptic(8)}
+          />
 
-        {/* Settings */}
-        <MobileNavItem
-          href="/dashboard/settings"
-          icon={<Settings size={17} strokeWidth={2} />}
-          label="Settings"
-          active={pathname.startsWith("/dashboard/settings")}
-        />
+          <CompactNavItem
+            href="/dashboard/settings"
+            icon={<Settings size={16} strokeWidth={2.2} />}
+            label="Settings"
+            active={pathname.startsWith("/dashboard/settings")}
+            onHaptic={() => triggerHaptic(8)}
+          />
+        </div>
       </div>
     </nav>
   );
 }
 
-function MobileNavItem({
+function CompactNavItem({
   href,
   icon,
   label,
   active,
   experimental = false,
+  onHaptic,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   active: boolean;
   experimental?: boolean;
+  onHaptic: () => void;
 }) {
+  const handleClick = () => {
+    onHaptic();
+    playSelectSound();
+  };
+
   return (
     <Link
       href={href}
       aria-label={label}
-      onClick={playSelectSound}
+      onClick={handleClick}
       onMouseEnter={playHoverSound}
-      className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+      className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform active:scale-90"
     >
-      {/* Active Pill Background */}
+      {/* Micro Active Pill */}
       {active && (
         <motion.div
-          layoutId="instagramPillActiveBg"
+          layoutId="compactNavActive"
           transition={springConfig}
-          className="absolute inset-0 rounded-full bg-[#18392B] shadow-md shadow-[#18392B]/20"
+          className="absolute inset-0 rounded-xl bg-[#18392B] shadow-[0_2px_8px_rgba(24,57,43,0.3)]"
         />
       )}
 
-      {/* Bordered Icon Badge Container */}
+      {/* Icon Container */}
       <div
-        className={`
-          relative z-10 flex h-8 w-8 items-center justify-center rounded-full
-          border transition-all duration-300
-          ${
-            active
-              ? "border-white/30 bg-white/10 text-white"
-              : "border-[#121312]/15 bg-white/40 text-[#121312]/60 hover:border-[#121312]/30 hover:bg-white hover:text-[#121312]"
-          }
-        `}
+        className={`relative z-10 flex items-center justify-center transition-colors duration-200 ${
+          active ? "text-[#F8F6F0]" : "text-[#121312]/50 hover:text-[#121312]"
+        }`}
       >
         {icon}
 
-        {/* Experimental indicator */}
+        {/* Experimental Indicator Dot */}
         {experimental && !active && (
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-[#F0EDE6] bg-[#18392B]" />
+          <span className="absolute -right-1 -top-1 flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full border border-[#F0EDE6] bg-[#18392B]" />
+          </span>
         )}
       </div>
     </Link>

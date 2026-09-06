@@ -1,23 +1,25 @@
-import type { Metadata } from "next";
-import { Fraunces, Geist, Geist_Mono } from "next/font/google";
-import { AppToaster } from "@/components/providers/toaster";
-import "./globals.css";
 import CuelumeProvider from "@/components/providers/cuelume-provider";
+import { AppToaster } from "@/components/providers/toaster";
+import type { Metadata } from "next";
+import { DM_Sans, Geist_Mono, Instrument_Serif } from "next/font/google";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: "400",
   style: ["normal", "italic"],
 });
 
@@ -31,9 +33,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`
+        ${dmSans.variable}
+        ${geistMono.variable}
+        ${instrumentSerif.variable}
+        h-full antialiased
+      `}
     >
-      <body className="flex min-h-full flex-col bg-[#080D0A]">
+      <body className="flex min-h-full flex-col bg-[#080D0A] font-[family-name:var(--font-body)]">
         <CuelumeProvider />
         {children}
         <AppToaster />

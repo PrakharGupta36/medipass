@@ -56,86 +56,90 @@ export default function DashboardSidebar({
   return (
     <motion.aside
       initial={false}
-      animate={{ width: collapsed ? 70 : 260 }}
+      animate={{ width: collapsed ? 72 : 260 }}
       transition={springConfig}
       className="
         fixed inset-y-0 left-0 z-40 hidden lg:flex
-        flex-col border-r border-[#121312]/10
-        bg-[#F0EDE6]/90 backdrop-blur-xl text-[#121312]
-        shadow-[10px_0_30px_rgba(18,19,18,0.02)]
+        flex-col border-r border-black/10
+        bg-[#FAF8F5]
+        text-[#121312] p-2
+        shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,1px_0_0_rgba(255,255,255,0.6)_inset]
       "
     >
+      {/* Top Edge Specular Reflection */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+
       {/* BRAND HEADER & TOGGLE */}
-      <div className="relative px-4 pt-6">
+      <div className="relative px-1 pt-3 pb-2">
         <Link
           href="/dashboard"
           onClick={playSelectSound}
           onMouseEnter={playHoverSound}
           className="
-      group flex h-22 w-full
-      items-center justify-center
-      overflow-hidden
-      rounded-[28px]
-    "
+            group flex h-28 w-full
+            items-center justify-center
+            overflow-hidden rounded-2xl
+            scale-85
+            transition-all duration-200 hover:border-black/10
+          "
         >
           <motion.div
             animate={{
               width: collapsed ? 0 : 190,
-              height: collapsed ? 0 : 256,
+              height: collapsed ? 0 : 190,
             }}
             transition={springConfig}
             className="relative shrink-0"
           >
             <Image
-              src="/logo.png"
+              src="/logo-2.png"
               alt="MediPass"
               fill
               sizes="190px"
               className="
-          object-contain
-          transition-transform duration-300
-          group-hover:scale-[1.03]
-        "
+                object-contain
+                transition-transform duration-300
+                group-hover:scale-[1.02]
+              "
               priority
             />
           </motion.div>
         </Link>
 
+        {/* Tactile Toggle Button */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleToggle}
           onMouseEnter={playHoverSound}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="
-      absolute -right-3 top-14
-      flex h-6 w-6 items-center justify-center
-      rounded-full
-      border border-[#121312]/15
-      bg-[#F0EDE6]
-      text-[#121312]/60
-      shadow-sm
-      transition-colors
-      hover:bg-white
-      hover:text-[#121312]
-    "
+            absolute -right-3 top-8
+            z-20 flex h-6 w-6 items-center justify-center
+            rounded-full
+            border border-black/10
+            bg-gradient-to-b from-white to-[#F0ECE6]
+            text-[#121312]/70
+            shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.08)]
+            transition-all hover:text-[#121312]
+          "
         >
           <motion.div
             animate={{ rotate: collapsed ? 180 : 0 }}
             transition={springConfig}
           >
-            <ChevronLeft size={13} strokeWidth={2.5} />
+            <ChevronLeft size={12} strokeWidth={2.5} />
           </motion.div>
         </motion.button>
       </div>
+
       {/* NAVIGATION */}
-      <div className="flex-1 overflow-y-auto px-3 pt-6">
-        {/* RECORD */}
-         <SidebarSectionLabel collapsed={collapsed}>Record</SidebarSectionLabel>
+      <div className="flex-1 overflow-y-auto px-1 pt-4 space-y-0.5">
+        <SidebarSectionLabel collapsed={collapsed}>Record</SidebarSectionLabel>
 
         <SidebarItem
           href="/dashboard"
-          icon={<Home size={17} strokeWidth={1.8} />}
+          icon={<Home size={16} strokeWidth={2} />}
           label="Dashboard"
           active={pathname === "/dashboard"}
           collapsed={collapsed}
@@ -143,7 +147,7 @@ export default function DashboardSidebar({
 
         <SidebarItem
           href="/dashboard/health"
-          icon={<Activity size={17} strokeWidth={1.8} />}
+          icon={<Activity size={16} strokeWidth={2} />}
           label="Health Records"
           active={pathname.startsWith("/dashboard/health")}
           collapsed={collapsed}
@@ -151,7 +155,7 @@ export default function DashboardSidebar({
 
         <SidebarItem
           href="/dashboard/timeline"
-          icon={<FileText size={17} strokeWidth={1.8} />}
+          icon={<FileText size={16} strokeWidth={2} />}
           label="Timeline"
           active={pathname.startsWith("/dashboard/timeline")}
           collapsed={collapsed}
@@ -159,14 +163,13 @@ export default function DashboardSidebar({
 
         <SidebarDivider />
 
-        {/* EXPERIMENTAL */}
         <SidebarSectionLabel collapsed={collapsed}>
           Experimental
         </SidebarSectionLabel>
 
         <SidebarItem
           href="/dashboard/assistant"
-          icon={<Bot size={17} strokeWidth={1.8} />}
+          icon={<Bot size={16} strokeWidth={2} />}
           label="AI Assistant"
           active={pathname.startsWith("/dashboard/assistant")}
           experimental
@@ -175,14 +178,13 @@ export default function DashboardSidebar({
 
         <SidebarDivider />
 
-        {/* ACCESS CONTROL */}
         <SidebarSectionLabel collapsed={collapsed}>
           Access Control
         </SidebarSectionLabel>
 
         <SidebarItem
           href="/dashboard/share"
-          icon={<QrCode size={17} strokeWidth={1.8} />}
+          icon={<QrCode size={16} strokeWidth={2} />}
           label="Share Record"
           active={pathname.startsWith("/dashboard/share")}
           important
@@ -191,12 +193,11 @@ export default function DashboardSidebar({
 
         <SidebarDivider />
 
-        {/* ACCOUNT */}
         <SidebarSectionLabel collapsed={collapsed}>Account</SidebarSectionLabel>
 
         <SidebarItem
           href="/dashboard/profile"
-          icon={<UserRound size={17} strokeWidth={1.8} />}
+          icon={<UserRound size={16} strokeWidth={2} />}
           label="Profile Details"
           active={pathname.startsWith("/dashboard/profile")}
           collapsed={collapsed}
@@ -204,7 +205,7 @@ export default function DashboardSidebar({
 
         <SidebarItem
           href="/dashboard/settings"
-          icon={<Settings size={17} strokeWidth={1.8} />}
+          icon={<Settings size={16} strokeWidth={2} />}
           label="Settings"
           active={pathname.startsWith("/dashboard/settings")}
           collapsed={collapsed}
@@ -212,28 +213,51 @@ export default function DashboardSidebar({
       </div>
 
       {/* USER FOOTER */}
-      <div className="border-t border-[#121312]/10 p-3">
-        <div className="overflow-hidden rounded-2xl border border-[#121312]/10 bg-white/70">
-          {/* USER */}
-          <div className="flex items-center gap-3 p-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#18392B]/10 text-[#18392B]">
-              <UserRound size={15} strokeWidth={1.8} />
-            </div>
+      <div className="pt-2 px-1">
+        <div className="overflow-hidden rounded-2xl border border-black/5 bg-gradient-to-b from-white to-[#F5F2EC] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.03)]">
+          {/* USER INFO */}
+          <div
+            className={`
+              flex items-center transition-all duration-300
+              ${collapsed ? "justify-center p-2" : "gap-3 p-2.5"}
+            `}
+          >
+            <motion.div
+              animate={{
+                width: collapsed ? 36 : 32,
+                height: collapsed ? 36 : 32,
+              }}
+              transition={springConfig}
+              className="
+                flex shrink-0 items-center justify-center
+                rounded-xl
+                border border-black/10
+                bg-gradient-to-b from-[#1C4031] to-[#122B20]
+                text-[#F8F6F0]
+                shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_2px_4px_rgba(0,0,0,0.15)]
+              "
+            >
+              <motion.div
+                animate={{ scale: collapsed ? 1.05 : 1 }}
+                transition={springConfig}
+              >
+                <UserRound size={collapsed ? 18 : 15} strokeWidth={2} />
+              </motion.div>
+            </motion.div>
 
             <AnimatePresence mode="wait">
               {!collapsed && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
                   transition={{ duration: 0.15 }}
                   className="min-w-0 flex-1"
                 >
                   <p className="truncate text-xs font-semibold text-[#121312]">
                     {name}
                   </p>
-
-                  <p className="truncate font-mono text-[9px] text-[#121312]/40">
+                  <p className="truncate font-mono text-[9px] text-[#121312]/50">
                     {email}
                   </p>
                 </motion.div>
@@ -242,37 +266,34 @@ export default function DashboardSidebar({
           </div>
 
           {/* SIGN OUT */}
-          <div className="border-t border-[#121312]/10">
-            <form action="/auth/logout" method="post">
-              <button
-                type="submit"
-                onClick={playSelectSound}
-                onMouseEnter={playHoverSound}
-                className="
-                  flex w-full items-center gap-2.5
-                  px-3 py-2.5
-                  font-mono text-[10px] uppercase tracking-wider
-                  text-[#121312]/50
-                  transition-colors
-                  hover:bg-[#121312]/5 hover:text-[#121312]
-                "
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={springConfig}
+                className="overflow-hidden border-t border-black/5 bg-[#FAF8F5]/60"
               >
-                <LogOut size={14} strokeWidth={1.8} className="shrink-0" />
-
-                <AnimatePresence mode="wait">
-                  {!collapsed && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      Sign Out
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </button>
-            </form>
-          </div>
+                <form action="/auth/logout" method="post">
+                  <button
+                    type="submit"
+                    onClick={playSelectSound}
+                    onMouseEnter={playHoverSound}
+                    className="
+                      flex w-full items-center gap-2.5
+                      px-3 py-2 font-mono text-xs
+                      font-semibold text-[#121312]/50
+                      transition-colors hover:bg-black/5 hover:text-[#121312]
+                    "
+                  >
+                    <LogOut size={13} strokeWidth={2} className="shrink-0" />
+                    <span>Sign Out</span>
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* FOOTER META */}
@@ -283,8 +304,8 @@ export default function DashboardSidebar({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="
-                mt-3 flex items-center justify-between
-                px-1 font-mono text-[8px]
+                mt-2 flex items-center justify-between
+                px-2 font-mono text-[8px]
                 uppercase tracking-[0.16em]
                 text-[#121312]/30
               "
@@ -311,7 +332,7 @@ function SidebarSectionLabel({
   collapsed: boolean;
 }) {
   return (
-    <div className="mb-2 flex h-4 items-center gap-2 px-2">
+    <div className="mt-2 mb-1 flex h-4 items-center gap-2 px-2">
       {!collapsed && (
         <span className="h-1 w-1 shrink-0 rounded-full bg-[#18392B]" />
       )}
@@ -342,8 +363,8 @@ function SidebarSectionLabel({
 
 function SidebarDivider() {
   return (
-    <div className="my-4 px-2">
-      <div className="h-px bg-[#121312]/10" />
+    <div className="my-2 px-2">
+      <div className="h-px bg-black/5 shadow-[0_1px_0_rgba(255,255,255,0.8)]" />
     </div>
   );
 }
@@ -376,31 +397,22 @@ function SidebarItem({
       onMouseEnter={playHoverSound}
       title={collapsed ? label : undefined}
       className={`
-        group relative mb-1 flex h-10
+        group relative flex h-9
         items-center rounded-xl px-2.5
-        text-xs font-medium
-        transition-colors duration-200
-        ${active ? "text-white" : "text-[#121312]/70 hover:text-[#121312]"}
+        text-xs font-semibold transition-all duration-150 active:scale-[0.98]
+        ${
+          active
+            ? "border border-[#18392B]/20 bg-gradient-to-b from-[#1C4031] via-[#18392B] to-[#122B20] text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_2px_5px_rgba(24,57,43,0.2)]"
+            : "border border-transparent text-[#121312]/65 hover:border-black/5 hover:bg-white/60 hover:text-[#121312] hover:shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]"
+        }
       `}
     >
-      {/* ACTIVE BACKGROUND */}
-      {active && (
-        <motion.div
-          layoutId="sidebarActiveBackground"
-          transition={springConfig}
-          className="
-            absolute inset-0 rounded-xl
-            bg-[#18392B] shadow-sm
-          "
-        />
-      )}
-
       {/* ICON */}
       <span
         className={`
-          relative z-10 flex h-6 w-6
+          relative z-10 flex h-5 w-5
           shrink-0 items-center justify-center
-          rounded-md transition-colors duration-200
+          transition-colors duration-200
           ${
             active
               ? "text-white"
@@ -420,7 +432,7 @@ function SidebarItem({
             exit={{ opacity: 0, x: -5 }}
             transition={{ duration: 0.15 }}
             className="
-              relative z-10 ml-3
+              relative z-10 ml-2.5
               flex min-w-0 flex-1
               items-center justify-between
             "
@@ -437,13 +449,13 @@ function SidebarItem({
               <span
                 className="
                   rounded-full
-                  border border-[#18392B]/15
+                  border border-[#18392B]/20
                   bg-[#18392B]/5
                   px-1.5 py-0.5
                   font-mono text-[7px]
                   font-semibold uppercase
                   tracking-[0.08em]
-                  text-[#18392B]/60
+                  text-[#18392B]
                 "
               >
                 Beta

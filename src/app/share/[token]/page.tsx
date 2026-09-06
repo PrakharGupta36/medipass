@@ -14,6 +14,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { createHash } from "node:crypto";
+import Image from "next/image";
 
 export default async function SharedRecordPage({
   params,
@@ -49,8 +50,16 @@ export default async function SharedRecordPage({
         {/* Header */}
         <header className="flex items-center justify-between border-b border-[#121312]/10 pb-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#18392B] text-[#F8F6F0]">
-              <HeartPulse size={20} />
+            {/* Skeuomorphic Container with Logo */}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#121312]/10 bg-gradient-to-b from-white to-[#F0EDE6] p-1.5 shadow-[0_2px_4px_rgba(18,19,18,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <Image
+                src="/logo-2.png"
+                alt="MediPass Logo"
+                width={28}
+                height={28}
+                className="h-full w-full object-contain"
+                priority
+              />
             </div>
 
             <div>
@@ -64,31 +73,33 @@ export default async function SharedRecordPage({
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-[#18392B]">
+          <div className="flex items-center gap-1.5 rounded-full border border-[#18392B]/20 bg-gradient-to-b from-white/80 to-[#F0EDE6] px-3 py-1 font-mono text-[9px] uppercase tracking-wider text-[#18392B] shadow-[0_2px_6px_rgba(18,19,18,0.04),inset_0_1px_0_rgba(255,255,255,0.9)]">
             <ShieldCheck size={14} />
             <span>Temporary Access</span>
           </div>
         </header>
 
         {/* Patient Identity Header */}
-        <section className="rounded-3xl border border-[#121312]/10 bg-white p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] sm:p-8">
-          <p className="font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/40">
-            Patient Medical Record
-          </p>
+        <section className="relative rounded-[28px] border border-[#121312]/10 bg-[#121312]/[0.03] p-1.5 shadow-[0_16px_36px_rgba(18,19,18,0.04)]">
+          <div className="relative overflow-hidden rounded-[22px] border border-[#121312]/10 bg-white p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(18,19,18,0.03)] sm:p-8">
+            <p className="font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/40">
+              Patient Medical Record
+            </p>
 
-          <h1 className="mt-1 font-serif text-3xl font-normal text-[#121312]">
-            {profile?.full_name || "Anonymous Patient"}
-          </h1>
+            <h1 className="mt-1 font-serif text-3xl font-normal text-[#121312]">
+              {profile?.full_name || "Anonymous Patient"}
+            </h1>
 
-          <p className="mt-1 text-xs text-[#121312]/60">
-            Explicitly authorized temporary medical view.
-          </p>
+            <p className="mt-1 text-xs text-[#121312]/60">
+              Explicitly authorized temporary medical view.
+            </p>
 
-          <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-[#121312]/10 bg-[#F8F6F0] px-3 py-2 font-mono text-[9px] uppercase tracking-wider text-[#121312]/50">
-            <span>Access Expires:</span>
-            <span className="font-semibold text-[#121312]">
-              {new Date(data.expires_at).toLocaleString()}
-            </span>
+            <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-[#121312]/10 bg-gradient-to-b from-white via-[#F8F6F0] to-[#EBE7DC] px-3 py-2 font-mono text-[9px] uppercase tracking-wider text-[#121312]/50 shadow-[0_1px_3px_rgba(18,19,18,0.08),inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <span>Access Expires:</span>
+              <span className="font-semibold text-[#121312]">
+                {new Date(data.expires_at).toLocaleString()}
+              </span>
+            </div>
           </div>
         </section>
 
@@ -98,11 +109,8 @@ export default async function SharedRecordPage({
             <Grid
               items={[
                 ["Blood Group", profile.blood_group || "Not provided"],
-
                 ["Date of Birth", profile.date_of_birth || "Not provided"],
-
                 ["Phone Number", profile.phone || "Not provided"],
-
                 [
                   "Emergency Contact",
                   profile.emergency_contact_name
@@ -181,7 +189,7 @@ function MedicalReportsSection({
               rel="noopener noreferrer"
               className="group flex items-center gap-4 rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4 transition-colors hover:bg-[#F8F6F0]"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#18392B] border border-[#121312]/10">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#121312]/10 bg-white text-[#18392B] shadow-[0_1px_3px_rgba(18,19,18,0.06)]">
                 <FileText size={16} />
               </div>
 
@@ -211,7 +219,7 @@ function MedicalReportsSection({
   );
 }
 
-/* Generic Section Container */
+/* Generic Double-Bordered Section Container */
 function Section({
   title,
   icon,
@@ -222,18 +230,20 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-[#121312]/10 bg-white p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] sm:p-8">
-      <div className="flex items-center gap-3 border-b border-[#121312]/10 pb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F8F6F0] text-[#18392B]">
-          {icon}
+    <section className="relative rounded-[28px] border border-[#121312]/10 bg-[#121312]/[0.03] p-1.5 shadow-[0_16px_36px_rgba(18,19,18,0.04)]">
+      <div className="relative overflow-hidden rounded-[22px] border border-[#121312]/10 bg-white p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(18,19,18,0.03)] sm:p-8">
+        <div className="flex items-center gap-3 border-b border-[#121312]/10 pb-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#121312]/10 bg-gradient-to-b from-white to-[#F0EDE6] text-[#18392B] shadow-[0_1px_3px_rgba(18,19,18,0.06)]">
+            {icon}
+          </div>
+
+          <h2 className="font-serif text-lg font-normal text-[#121312]">
+            {title}
+          </h2>
         </div>
 
-        <h2 className="font-serif text-lg font-normal text-[#121312]">
-          {title}
-        </h2>
+        {children}
       </div>
-
-      {children}
     </section>
   );
 }
@@ -245,7 +255,7 @@ function Grid({ items }: { items: string[][] }) {
       {items.map(([label, value]) => (
         <div
           key={label}
-          className="rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4"
+          className="rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
         >
           <p className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
             {label}
@@ -279,7 +289,7 @@ function RecordSection({
           items.map((item: any) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4"
+              className="rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
             >
               <p className="text-xs font-semibold text-[#121312]">
                 {item[fields[0]]}
@@ -308,8 +318,8 @@ function RecordSection({
 function InvalidShare({ message }: { message: string }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#F8F6F0] px-6 text-[#121312]">
-      <div className="w-full max-w-md rounded-3xl border border-[#121312]/10 bg-white p-8 text-center shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-700">
+      <div className="w-full max-w-md rounded-[28px] border border-[#121312]/10 bg-white p-8 text-center shadow-[0_16px_36px_rgba(18,19,18,0.04)]">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-700 shadow-[0_2px_4px_rgba(239,68,68,0.12)]">
           <AlertTriangle size={22} />
         </div>
 

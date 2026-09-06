@@ -72,28 +72,7 @@ export default async function DashboardPage() {
         </section>
       </div>
 
-      <footer
-        className="animate-rise-in mt-16 border-t border-[#121312]/10 pt-6"
-        style={{ animationDelay: "420ms" }}
-      >
-        <div className="flex flex-col gap-4 font-mono text-[10px] text-[#121312]/40 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18392B]" />
-            </span>
-            <span className="uppercase tracking-[0.18em]">
-              MediPass Vault &middot; High-Security Vault
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6 tracking-[0.14em]">
-            <span>CONFIDENTIAL</span>
-            <span>&middot;</span>
-            <span>END-TO-END ENCRYPTED</span>
-          </div>
-        </div>
-      </footer>
+     
     </div>
   );
 }

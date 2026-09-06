@@ -4,6 +4,7 @@
 import { toast } from "@/lib/toast";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowLeft,
   ArrowUp,
   Bot,
   CheckCircle2,
@@ -19,6 +20,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useRef, useState } from "react";
 
 // Fluid Awwwards-style Spring Physics
@@ -166,36 +168,19 @@ export default function AssistantPage() {
 
       {/* ASSISTANT HEADER */}
       <header className="relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-[#121312]/10 bg-[#F0EDE6]/80 px-3.5 backdrop-blur-xl sm:h-[72px] sm:px-6">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#18392B] text-white shadow-xs sm:h-10 sm:w-10 sm:rounded-xl"
-          >
-            <Bot size={16} strokeWidth={1.7} className="sm:hidden" />
-            <Bot size={18} strokeWidth={1.7} className="hidden sm:block" />
-          </motion.div>
-
-          <div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <h1 className="text-xs font-semibold text-[#121312] sm:text-sm">
-                MediPass Assistant
-              </h1>
-              <span className="hidden rounded-full border border-[#18392B]/15 bg-[#18392B]/5 px-2 py-0.5 font-mono text-[7px] uppercase tracking-[0.12em] text-[#18392B] sm:inline-block">
-                Vault Intelligence
-              </span>
-            </div>
-
-            <div className="mt-0.5 flex items-center gap-1.5">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#18392B]" />
-              </span>
-              <span className="font-mono text-[7px] uppercase tracking-[0.14em] text-[#121312]/50">
-                End-to-End Grounded
-              </span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
+          {/* BACK TO DASHBOARD BUTTON */}
+          <Link href="/dashboard">
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-1.5 rounded-lg border border-[#121312]/10 bg-white/70 px-2.5 py-1.5 font-mono text-[10px] font-medium text-[#121312] shadow-2xs transition hover:bg-white sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs"
+            >
+              <ArrowLeft size={14} className="sm:hidden" />
+              <ArrowLeft size={16} className="hidden sm:block" />
+              <span className="hidden xs:inline">Dashboard</span>
+            </motion.div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -220,8 +205,8 @@ export default function AssistantPage() {
             className="flex items-center gap-1.5 rounded-lg border border-[#121312]/10 bg-white px-2.5 py-1.5 font-mono text-[8px] uppercase tracking-[0.08em] text-[#121312] shadow-xs transition hover:bg-[#18392B] hover:text-[#F0EDE6] sm:rounded-xl sm:px-3 sm:py-2"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#18392B]" />
-            <span className="hidden xs:inline">Record Context</span>
-            <span className="xs:hidden">Context</span>
+            <span className="hidden xs:inline text-xs">Record Context</span>
+            <span className="xs:hidden text-xs">Context</span>
             <ChevronRight
               size={12}
               className={`transition-transform duration-200 ${recordDrawerOpen ? "rotate-90" : ""}`}

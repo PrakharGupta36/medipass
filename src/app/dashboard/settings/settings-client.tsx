@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/dashboard/settings/settings-client.tsx
 
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
   Check,
@@ -11,13 +13,13 @@ import {
   Lock,
   LogOut,
   Mail,
+  ShieldAlert,
   ShieldCheck,
   Trash2,
   UserRound,
-  ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import {
@@ -52,18 +54,54 @@ const itemVariants = {
 };
 
 export default function SettingsClient({
+  userId,
   email,
-  emailVerified,
-  notificationsEnabled,
+  emailVerified: initialEmailVerified,
+  notificationsEnabled: initialNotifications,
 }: {
+  userId: string;
   email: string;
   emailVerified: boolean;
   notificationsEnabled: boolean;
 }) {
-  const [notifications, setNotifications] = useState(notificationsEnabled);
+  const [emailVerified, setEmailVerified] = useState(initialEmailVerified);
+  const [notifications, setNotifications] = useState(initialNotifications);
+
   const [savingNotifications, startNotificationTransition] = useTransition();
   const [sendingPasswordReset, startPasswordTransition] = useTransition();
   const [resendingVerification, startVerificationTransition] = useTransition();
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    // Realtime channel listener for active settings and verification status
+    const channel = supabase
+      .channel(`realtime:settings:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${userId}`,
+        },
+        (payload: { new: Record<string, any> }) => {
+          if (payload.new) {
+            if (typeof payload.new.email_verified === "boolean") {
+              setEmailVerified(payload.new.email_verified);
+            }
+            if (typeof payload.new.notifications_enabled === "boolean") {
+              setNotifications(payload.new.notifications_enabled);
+            }
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, supabase]);
 
   function handleNotificationChange() {
     const nextValue = !notifications;
@@ -126,7 +164,7 @@ export default function SettingsClient({
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="w-full text-[#121312] space-y-6 sm:space-y-8"
+      className="w-full space-y-6 text-[#121312] sm:space-y-8"
     >
       {/* SETTINGS SECTIONS CONTAINER */}
       <div className="space-y-6 sm:space-y-8">
@@ -153,11 +191,11 @@ export default function SettingsClient({
               ) : (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={handleVerification}
                   disabled={resendingVerification}
-                  className="inline-flex h-8 items-center justify-center gap-1.5 rounded-xl border border-[#121312]/15 bg-[#F8F6F0] px-3 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312] shadow-2xs transition hover:border-[#121312] hover:bg-[#121312] hover:text-[#F8F6F0] disabled:cursor-wait disabled:opacity-50"
+                  className="inline-flex h-8 items-center justify-center gap-1.5 rounded-xl border border-[#121312]/20 bg-gradient-to-b from-white via-[#F8F6F0] to-[#E6E2D8] px-3 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312] shadow-[0_2px_4px_rgba(18,19,18,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all hover:border-[#121312] hover:shadow-[0_4px_8px_rgba(18,19,18,0.12)] active:scale-95 disabled:cursor-wait disabled:opacity-50"
                 >
                   {resendingVerification ? (
                     <Loader2 size={11} className="animate-spin" />
@@ -213,53 +251,55 @@ export default function SettingsClient({
         </SettingsSection>
       </div>
 
-      {/* DANGER ZONE (Enhanced Double Border) */}
+      {/* DANGER ZONE - DOUBLE BORDERED SKEUOMORPHIC CARD */}
       <motion.section
         variants={itemVariants}
-        className="relative overflow-hidden rounded-3xl border border-red-500/20 bg-gradient-to-b from-red-50/60 to-red-50/20 p-5 ring-1 ring-red-500/10 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.05),0_0_0_1px_rgba(239,68,68,0.1)_inset] backdrop-blur-xs sm:p-8"
+        className="relative rounded-[28px] border border-red-500/20 bg-red-500/10 p-1.5 shadow-[0_12px_32px_rgba(239,68,68,0.08)]"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-red-200/80 bg-red-100/80 text-red-700 shadow-2xs">
-            <Trash2 size={18} />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[9px] font-semibold uppercase tracking-widest text-red-600">
-                Danger Zone
-              </span>
-              <span className="h-1 w-1 rounded-full bg-red-400" />
-              <span className="font-mono text-[8px] uppercase tracking-wider text-red-500/80 sm:text-[9px]">
-                Irreversible
-              </span>
+        <div className="relative overflow-hidden rounded-[22px] border border-red-300/40 bg-gradient-to-b from-red-50/90 via-red-50/40 to-red-100/30 p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_2px_rgba(239,68,68,0.1)] sm:p-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+            {/* Skeuomorphic Danger Button Badge */}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-red-300/80 bg-gradient-to-b from-red-100 to-red-200 text-red-700 shadow-[0_2px_6px_rgba(239,68,68,0.15),inset_0_1px_0_rgba(255,255,255,0.8)]">
+              <Trash2 size={18} />
             </div>
 
-            <h2 className="mt-1 font-serif text-lg font-normal text-[#121312] sm:text-xl">
-              Delete Account
-            </h2>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9px] font-semibold uppercase tracking-widest text-red-600">
+                  Danger Zone
+                </span>
+                <span className="h-1 w-1 rounded-full bg-red-400" />
+                <span className="font-mono text-[8px] uppercase tracking-wider text-red-500/80 sm:text-[9px]">
+                  Irreversible
+                </span>
+              </div>
 
-            <p className="mt-1 font-mono text-xs text-[#121312]/60 leading-relaxed">
-              Permanently purge your MediPass medical vault, timeline logs, and
-              sharing keys.
-            </p>
+              <h2 className="mt-1 font-serif text-lg font-normal text-[#121312] sm:text-xl">
+                Delete Account
+              </h2>
+
+              <p className="mt-1 font-mono text-xs text-[#121312]/60 leading-relaxed">
+                Permanently purge your MediPass medical vault, timeline logs,
+                and sharing keys.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="mt-5 flex flex-col gap-3 border-t border-red-200/60 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:pt-5">
-          <motion.button
-            whileHover={{ scale: 1 }}
-            whileTap={{ scale: 0.98 }}
-            type="button"
-            disabled
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-red-200/80 bg-white/80 px-4 font-mono text-[9px] font-semibold uppercase tracking-wider text-red-400 opacity-60 shadow-2xs cursor-not-allowed sm:w-auto"
-          >
-            <ShieldAlert size={12} />
-            Delete Account
-          </motion.button>
+          <div className="mt-5 flex flex-col gap-3 border-t border-red-200/60 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:pt-5">
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              disabled
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-red-300/60 bg-gradient-to-b from-white/90 to-red-50/50 px-4 font-mono text-[9px] font-semibold uppercase tracking-wider text-red-400 opacity-60 shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)] cursor-not-allowed sm:w-auto hover:opacity-100"
+            >
+              <ShieldAlert size={12} />
+              Delete Account
+            </motion.button>
 
-          <span className="font-mono text-[8px] uppercase tracking-widest text-[#121312]/40 sm:text-[9px]">
-            Protected Workflow
-          </span>
+            <span className="font-mono text-[8px] uppercase tracking-widest text-[#121312]/40 sm:text-[9px]">
+              Protected Workflow
+            </span>
+          </div>
         </div>
       </motion.section>
 
@@ -278,7 +318,7 @@ export default function SettingsClient({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 rounded-full border border-[#18392B]/15 bg-[#18392B]/5 px-3 py-1.5 self-start sm:self-auto">
+        <div className="flex items-center gap-2 rounded-full border border-[#18392B]/20 bg-gradient-to-b from-white/80 to-[#F0EDE6] px-3.5 py-1.5 shadow-[0_2px_6px_rgba(18,19,18,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] self-start sm:self-auto">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18392B]" />
@@ -294,7 +334,7 @@ export default function SettingsClient({
 }
 
 /* ===============================================================
-   SECTION
+   DOUBLE-BORDERED SKEUOMORPHIC SECTION CONTAINER
 ================================================================ */
 
 function SettingsSection({
@@ -311,33 +351,37 @@ function SettingsSection({
   return (
     <motion.section
       variants={itemVariants}
-      className="relative overflow-hidden rounded-3xl border border-[#121312]/10 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.03),0_0_0_1px_rgba(18,19,18,0.02)_inset] backdrop-blur-md"
+      className="relative rounded-[28px] border border-[#121312]/10 bg-[#121312]/[0.03] p-1.5 shadow-[0_16px_36px_rgba(18,19,18,0.04)]"
     >
-      {/* Heading */}
-      <div className="flex items-center gap-3.5 border-b border-[#121312]/10 bg-[#F8F6F0]/30 px-5 py-4 sm:px-8 sm:py-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#18392B]/10 bg-[#F8F6F0] text-[#18392B] shadow-2xs">
-          {icon}
+      {/* Inner Frame */}
+      <div className="relative overflow-hidden rounded-[22px] border border-[#121312]/10 bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.9),inset_0_-1px_1px_rgba(18,19,18,0.03)]">
+        {/* Header Bar */}
+        <div className="flex items-center gap-3.5 border-b border-[#121312]/10 bg-gradient-to-b from-[#FAF8F5] via-[#F3F0E6] to-[#EAE6DA] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] sm:px-8 sm:py-4.5">
+          {/* Skeuomorphic Icon Pill */}
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#121312]/10 bg-gradient-to-b from-white to-[#F0EDE6] text-[#18392B] shadow-[0_2px_4px_rgba(18,19,18,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]">
+            {icon}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h2 className="font-serif text-base font-normal text-[#121312] sm:text-lg">
+              {title}
+            </h2>
+
+            <p className="truncate font-mono text-[8px] uppercase tracking-wider text-[#121312]/50 sm:text-[9px]">
+              {description}
+            </p>
+          </div>
         </div>
 
-        <div className="min-w-0 flex-1">
-          <h2 className="font-serif text-base font-normal text-[#121312] sm:text-lg">
-            {title}
-          </h2>
-
-          <p className="truncate font-mono text-[8px] uppercase tracking-wider text-[#121312]/40 sm:text-[9px]">
-            {description}
-          </p>
-        </div>
+        {/* Rows List */}
+        <div className="divide-y divide-[#121312]/5 bg-white">{children}</div>
       </div>
-
-      {/* Rows */}
-      <div className="divide-y divide-[#121312]/5">{children}</div>
     </motion.section>
   );
 }
 
 /* ===============================================================
-   ROW
+   SKEUOMORPHIC INTERACTIVE ROW
 ================================================================ */
 
 function SettingsRow({
@@ -360,9 +404,9 @@ function SettingsRow({
   onClick?: () => void;
 }) {
   const content = (
-    <div className="group relative flex min-h-[72px] w-full items-center gap-3.5 px-5 py-4 transition-all duration-200 hover:bg-[#F8F6F0]/50 sm:gap-4 sm:px-8">
-      {/* Icon */}
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#121312]/5 bg-[#F8F6F0] text-[#121312]/50 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-[#18392B]/20 group-hover:bg-[#18392B] group-hover:text-white">
+    <div className="group relative flex min-h-[72px] w-full items-center gap-3.5 px-5 py-4 transition-all duration-200 hover:bg-gradient-to-r hover:from-[#F8F6F0]/80 hover:to-transparent sm:gap-4 sm:px-8">
+      {/* Skeuomorphic Icon Capsule */}
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#121312]/10 bg-gradient-to-b from-white via-[#F8F6F0] to-[#EBE7DC] text-[#121312]/60 shadow-[0_1px_3px_rgba(18,19,18,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 group-hover:scale-105 group-hover:border-[#18392B]/30 group-hover:bg-[#18392B] group-hover:text-green-900 group-hover:shadow-[0_4px_12px_rgba(24,57,43,0.25)]">
         {icon}
       </div>
 
@@ -390,7 +434,7 @@ function SettingsRow({
     return (
       <Link
         href={href}
-        className="block focus-visible:outline-none focus-visible:bg-[#F8F6F0]"
+        className="block focus-visible:bg-[#F8F6F0] focus-visible:outline-none"
       >
         {content}
       </Link>
@@ -402,7 +446,7 @@ function SettingsRow({
       <form action="/auth/logout" method="post">
         <button
           type="submit"
-          className="block w-full text-left focus-visible:outline-none focus-visible:bg-[#F8F6F0]"
+          className="block w-full text-left focus-visible:bg-[#F8F6F0] focus-visible:outline-none"
         >
           {content}
         </button>
@@ -415,7 +459,7 @@ function SettingsRow({
       <button
         type="button"
         onClick={onClick}
-        className="block w-full text-left focus-visible:outline-none focus-visible:bg-[#F8F6F0]"
+        className="block w-full text-left focus-visible:bg-[#F8F6F0] focus-visible:outline-none"
       >
         {content}
       </button>
@@ -426,7 +470,7 @@ function SettingsRow({
 }
 
 /* ===============================================================
-   STATUS BADGE
+   SKEUOMORPHIC EMBOSSED STATUS BADGE
 ================================================================ */
 
 function StatusBadge({
@@ -436,7 +480,7 @@ function StatusBadge({
   type: "success";
 }) {
   return (
-    <span className="inline-flex h-7 items-center gap-1.5 rounded-xl border border-[#18392B]/20 bg-[#18392B]/10 px-2.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#18392B] shadow-2xs">
+    <span className="inline-flex h-7 items-center gap-1.5 rounded-xl border border-[#18392B]/30 bg-gradient-to-b from-[#24523E] to-[#18392B] px-2.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_2px_6px_rgba(24,57,43,0.3),inset_0_1px_0_rgba(255,255,255,0.2)]">
       {children}
     </span>
   );

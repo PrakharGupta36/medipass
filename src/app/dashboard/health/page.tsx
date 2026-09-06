@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { DoubleBorderCard } from "@/components/ui/double-border-card";
 import { createClient } from "@/lib/supabase/server";
 import { deleteHealthItem } from "./actions";
 
@@ -79,28 +80,23 @@ export default async function HealthPage() {
   );
 
   return (
-    <div className="relative w-full text-[#121312]">
-      {/* Header */}
-      <section className="animate-tumble-in relative mb-8 overflow-hidden rounded-3xl border border-[#121312]/10 bg-white p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] sm:p-8">
-        <div className="animate-shimmer pointer-events-none absolute inset-0" />
-
+    <div className="relative w-full space-y-6 text-[#121312]">
+      {/* Header Banner */}
+      <DoubleBorderCard variant="light" className="w-full">
         <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#18392B]" />
-              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#121312]/40">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.4)]" />
+              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#121312]/40">
                 Medical Records
               </p>
             </div>
 
-            <h1
-              className="animate-reveal-mask mt-2 font-serif text-3xl font-normal tracking-tight text-[#121312] sm:text-4xl"
-              style={{ animationDelay: "150ms" }}
-            >
+            <h1 className="mt-1.5 font-serif text-3xl font-normal tracking-tight text-[#121312] sm:text-4xl">
               Health Profile
             </h1>
 
-            <p className="mt-2 max-w-xl text-xs leading-relaxed text-[#121312]/60 sm:text-sm">
+            <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-[#121312]/60 sm:text-sm">
               Keep important medical information, clinical history, and
               diagnostic records organized in one encrypted vault.
             </p>
@@ -108,19 +104,18 @@ export default async function HealthPage() {
 
           <Link
             href="/dashboard/health/add"
-            className="animate-glow-ring flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#18392B] px-5 font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-sm transition-all hover:scale-[1.03] hover:bg-[#122A20]"
+            className="group relative flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] px-5 font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_4px_12px_rgba(24,57,43,0.25)] transition-all active:scale-[0.98]"
           >
             <Plus size={16} />
             <span>Add Information</span>
           </Link>
         </div>
-      </section>
+      </DoubleBorderCard>
 
-      {/* Health Overview Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {/* Health Overview Grid */}
+      <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
         <HealthCard
-          index={0}
-          icon={<Droplets size={18} />}
+          icon={<Droplets size={17} />}
           title="Blood Group"
           description="Primary type"
           value={profile?.blood_group || "Not Added"}
@@ -128,16 +123,14 @@ export default async function HealthPage() {
         />
 
         <HealthCard
-          index={1}
-          icon={<AlertTriangle size={18} />}
+          icon={<AlertTriangle size={17} />}
           title="Allergies"
           description="Known allergens"
           value={allergies?.length ? `${allergies.length} Added` : "None Added"}
         />
 
         <HealthCard
-          index={2}
-          icon={<Pill size={18} />}
+          icon={<Pill size={17} />}
           title="Medications"
           description="Active prescriptions"
           value={
@@ -148,8 +141,7 @@ export default async function HealthPage() {
         />
 
         <HealthCard
-          index={3}
-          icon={<HeartPulse size={18} />}
+          icon={<HeartPulse size={17} />}
           title="Conditions"
           description="Diagnosed conditions"
           value={
@@ -158,8 +150,7 @@ export default async function HealthPage() {
         />
 
         <HealthCard
-          index={4}
-          icon={<Syringe size={18} />}
+          icon={<Syringe size={17} />}
           title="Vaccinations"
           description="Immunization logs"
           value={
@@ -170,8 +161,7 @@ export default async function HealthPage() {
         />
 
         <HealthCard
-          index={5}
-          icon={<ShieldAlert size={18} />}
+          icon={<ShieldAlert size={17} />}
           title="Emergency Contact"
           description="First response info"
           value={emergencyAdded ? "Added" : "Not Added"}
@@ -179,46 +169,35 @@ export default async function HealthPage() {
         />
       </div>
 
-      {/* Record Lists */}
-      <div className="mt-6 space-y-6">
-        <RecordList
-          title="Allergies"
-          items={allergies || []}
-          type="allergy"
-          sectionDelay={80}
-        />
+      {/* Item Lists */}
+      <div className="space-y-6">
+        <RecordList title="Allergies" items={allergies || []} type="allergy" />
         <RecordList
           title="Conditions"
           items={conditions || []}
           type="condition"
-          sectionDelay={140}
         />
         <RecordList
           title="Medications"
           items={medications || []}
           type="medication"
-          sectionDelay={200}
         />
         <RecordList
           title="Vaccinations"
           items={vaccinations || []}
           type="vaccination"
-          sectionDelay={260}
         />
       </div>
 
-      {/* Medical Reports */}
-      <section
-        className="animate-rise-in relative mt-8 rounded-3xl border border-[#121312]/10 bg-white shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]"
-        style={{ animationDelay: "320ms" }}
-      >
-        <div className="relative flex items-center justify-between border-b border-[#121312]/10 px-6 py-5">
+      {/* Medical Reports Vault Section */}
+      <DoubleBorderCard variant="light" className="w-full">
+        {/* Section Header */}
+        <div className="flex items-center justify-between pb-4">
           <div className="flex items-center gap-3">
-            <div
-              className="animate-pop-in flex h-10 w-10 items-center justify-center rounded-xl bg-[#F8F6F0] text-[#18392B]"
-              style={{ animationDelay: "420ms" }}
-            >
-              <FileText size={18} />
+            <div className="p-1 rounded-2xl bg-[#E6E0D6] shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.08)_inset]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.05)]">
+                <FileText size={18} />
+              </div>
             </div>
 
             <div>
@@ -228,10 +207,7 @@ export default async function HealthPage() {
                 </h2>
 
                 {reports && reports.length > 0 && (
-                  <span
-                    className="animate-count-badge-in rounded-md border border-[#18392B]/20 bg-[#18392B]/10 px-2 py-0.5 font-mono text-[9px] font-semibold text-[#18392B]"
-                    style={{ animationDelay: "480ms" }}
-                  >
+                  <span className="rounded-md border border-[#18392B]/20 bg-[#18392B]/10 px-2 py-0.5 font-mono text-[9px] font-semibold text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,0.8)]">
                     {reports.length}
                   </span>
                 )}
@@ -243,55 +219,54 @@ export default async function HealthPage() {
             </div>
           </div>
 
-          <Link
-            href="/dashboard/health/reports/add"
-            className="group flex h-9 items-center gap-2 rounded-xl border border-[#121312]/10 bg-[#F8F6F0] px-3.5 font-mono text-xs font-medium text-[#121312] transition hover:bg-[#18392B] hover:text-[#F8F6F0]"
-          >
-            <Plus
-              size={14}
-              className="transition-transform duration-300 group-hover:rotate-90"
-            />
-            <span>Add Report</span>
-          </Link>
-        </div>
-
-        {reports && reports.length > 0 ? (
-          <div className="divide-y divide-[#121312]/5">
-            {reports.map((report, i) => (
-              <MedicalReportRow key={report.id} report={report} index={i} />
-            ))}
-          </div>
-        ) : (
-          <div
-            className="animate-rise-in flex flex-col items-center justify-center px-6 py-14 text-center"
-            style={{ animationDelay: "420ms" }}
-          >
-            <div
-              className="animate-pop-in flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F8F6F0] text-[#121312]/30"
-              style={{ animationDelay: "500ms" }}
-            >
-              <FileText size={20} />
-            </div>
-
-            <p className="mt-4 font-serif text-lg font-normal text-[#121312]">
-              No medical reports added yet
-            </p>
-
-            <p className="mt-1 max-w-sm font-mono text-xs text-[#121312]/40">
-              Upload your prescriptions, diagnostic reports, or medical letters
-              to attach them to your profile.
-            </p>
-
+          <div className="p-1 rounded-xl bg-[#E6E0D6] shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset]">
             <Link
               href="/dashboard/health/reports/add"
-              className="mt-6 flex h-9 items-center gap-2 rounded-xl bg-[#18392B] px-4 font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] transition hover:scale-105 hover:bg-[#122A20]"
+              className="group flex h-9 items-center gap-1.5 rounded-lg border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] px-3 font-mono text-xs font-semibold text-[#121312] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.05)] transition-all active:scale-[0.97]"
             >
-              <Plus size={14} />
-              <span>Upload First Report</span>
+              <Plus
+                size={14}
+                className="transition-transform duration-300 group-hover:rotate-90"
+              />
+              <span>Add Report</span>
             </Link>
           </div>
-        )}
-      </section>
+        </div>
+
+        {/* Reports Inset Housing */}
+        <div className="mt-2 rounded-2xl border border-black/5 bg-[#E6E0D6] p-2 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.08)_inset]">
+          {reports && reports.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {reports.map((report) => (
+                <MedicalReportRow key={report.id} report={report} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] px-6 py-12 text-center shadow-[0_1px_0_rgba(255,255,255,1)_inset]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-black/5 bg-[#E6E0D6] text-[#121312]/30 shadow-[0_1px_2px_rgba(0,0,0,0.12)_inset,0_1px_0_rgba(255,255,255,0.8)]">
+                <FileText size={20} />
+              </div>
+
+              <p className="mt-4 font-serif text-lg font-normal text-[#121312]">
+                No medical reports added yet
+              </p>
+
+              <p className="mt-1 max-w-sm font-mono text-xs text-[#121312]/50">
+                Upload your prescriptions, diagnostic reports, or medical
+                letters to attach them to your profile.
+              </p>
+
+              <Link
+                href="/dashboard/health/reports/add"
+                className="mt-5 flex h-9 items-center gap-2 rounded-xl border border-[#18392B]/30 bg-gradient-to-b from-[#224f3c] via-[#18392B] to-[#10271d] px-4 font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_3px_8px_rgba(24,57,43,0.25)] transition-all active:scale-[0.98]"
+              >
+                <Plus size={14} />
+                <span>Upload First Report</span>
+              </Link>
+            </div>
+          )}
+        </div>
+      </DoubleBorderCard>
     </div>
   );
 }
@@ -300,16 +275,15 @@ export default async function HealthPage() {
 /* Medical report row */
 /* ================================================== */
 
-function MedicalReportRow({ report, index }: { report: any; index: number }) {
+function MedicalReportRow({ report }: { report: any }) {
   return (
     <Link
       href={`/api/medical-reports/${report.id}/view`}
       target="_blank"
       rel="noopener noreferrer"
-      className="animate-slide-in-left group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-[#F8F6F0]/60"
-      style={{ animationDelay: `${420 + index * 70}ms` }}
+      className="group flex items-center gap-4 rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] p-3.5 shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.04)] transition-all active:scale-[0.99]"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F8F6F0] text-[#18392B] transition-all duration-300 group-hover:scale-105 group-hover:bg-[#18392B] group-hover:text-white">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-black/5 bg-[#E6E0D6] text-[#18392B] shadow-[0_1px_0_rgba(255,255,255,0.8),0_1.5px_3px_rgba(0,0,0,0.08)_inset] transition-all duration-300 group-hover:scale-105">
         <FileText size={18} />
       </div>
 
@@ -318,14 +292,14 @@ function MedicalReportRow({ report, index }: { report: any; index: number }) {
           {report.title}
         </p>
 
-        <div className="mt-1 flex items-center gap-2 font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+        <div className="mt-0.5 flex items-center gap-2 font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
           <span>{report.report_type || "Medical Report"}</span>
           <span>•</span>
           <span>{formatReportDate(report.report_date)}</span>
         </div>
       </div>
 
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#121312]/30 transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-[#121312] group-hover:text-white">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-black/5 bg-white text-[#121312]/40 shadow-[0_1px_0_rgba(255,255,255,1)_inset] transition-all duration-300 group-hover:translate-x-0.5 group-hover:bg-[#18392B] group-hover:text-white">
         <ExternalLink size={14} />
       </div>
     </Link>
@@ -337,14 +311,12 @@ function MedicalReportRow({ report, index }: { report: any; index: number }) {
 /* ================================================== */
 
 function HealthCard({
-  index,
   icon,
   title,
   description,
   value,
   href = "/dashboard/health",
 }: {
-  index: number;
   icon: React.ReactNode;
   title: string;
   description: string;
@@ -352,32 +324,35 @@ function HealthCard({
   href?: string;
 }) {
   return (
-    <Link
-      href={href}
-      className="hover-tilt animate-tumble-in group relative overflow-hidden rounded-2xl border border-[#121312]/10 bg-white p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] hover:border-[#121312]/30 hover:shadow-lg"
-      style={{ animationDelay: `${120 + index * 80}ms` }}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F8F6F0] text-[#18392B] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#18392B] group-hover:text-white">
-          {icon}
+    <div className="p-1 rounded-2xl bg-[#E6E0D6] shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.08)_inset]">
+      <Link
+        href={href}
+        className="group relative flex flex-col justify-between rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] p-4 shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_3px_6px_rgba(0,0,0,0.04)] transition-all active:scale-[0.98]"
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/5 bg-gradient-to-b from-[#1C4031] to-[#122B20] text-[#F8F6F0] shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_2px_4px_rgba(0,0,0,0.15)] transition-transform duration-300 group-hover:scale-105">
+            {icon}
+          </div>
+
+          <ChevronRight
+            size={15}
+            className="text-[#121312]/30 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[#121312]"
+          />
         </div>
 
-        <ChevronRight
-          size={16}
-          className="text-[#121312]/20 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[#121312]"
-        />
-      </div>
+        <div className="mt-4">
+          <p className="text-xs font-semibold text-[#121312]">{title}</p>
 
-      <p className="mt-5 text-xs font-semibold text-[#121312]">{title}</p>
+          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+            {description}
+          </p>
 
-      <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
-        {description}
-      </p>
-
-      <p className="mt-4 font-mono text-xs font-semibold text-[#18392B]">
-        {value}
-      </p>
-    </Link>
+          <p className="mt-3 font-mono text-xs font-semibold text-[#18392B]">
+            {value}
+          </p>
+        </div>
+      </Link>
+    </div>
   );
 }
 
@@ -389,74 +364,69 @@ function RecordList({
   title,
   items,
   type,
-  sectionDelay = 0,
 }: {
   title: string;
   items: any[];
   type: "allergy" | "condition" | "medication" | "vaccination";
-  sectionDelay?: number;
 }) {
   if (!items.length) return null;
 
   return (
-    <section
-      className="animate-rise-in rounded-3xl border border-[#121312]/10 bg-white shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]"
-      style={{ animationDelay: `${sectionDelay}ms` }}
-    >
-      <div className="border-b border-[#121312]/10 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#18392B]" />
-            <h3 className="font-serif text-lg font-normal text-[#121312]">
-              {title}
-            </h3>
-          </div>
+    <DoubleBorderCard variant="light" className="w-full">
+      <div className="flex items-center justify-between pb-3">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#18392B] shadow-[0_0_4px_rgba(24,57,43,0.4)]" />
+          <h3 className="font-serif text-lg font-normal text-[#121312]">
+            {title}
+          </h3>
+        </div>
 
-          <span className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
-            {items.length} {items.length === 1 ? "Record" : "Records"}
-          </span>
+        <span className="font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/40">
+          {items.length} {items.length === 1 ? "Record" : "Records"}
+        </span>
+      </div>
+
+      {/* Recessed Container */}
+      <div className="mt-1 rounded-2xl border border-black/5 bg-[#E6E0D6] p-2 shadow-[0_1px_0_rgba(255,255,255,0.8),0_2px_4px_rgba(0,0,0,0.08)_inset]">
+        <div className="flex flex-col gap-2">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between gap-4 rounded-xl border border-black/5 bg-gradient-to-b from-white to-[#F3EFE9] px-4 py-3 shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_2px_4px_rgba(0,0,0,0.04)]"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-[#121312]">
+                  {item.name}
+                </p>
+
+                <p className="mt-0.5 font-mono text-[10px] text-[#121312]/50">
+                  {item.reaction ||
+                    item.dosage ||
+                    item.status ||
+                    item.date ||
+                    "Recorded"}
+                </p>
+              </div>
+
+              <form
+                action={async () => {
+                  "use server";
+                  await deleteHealthItem(type, item.id);
+                }}
+              >
+                <button
+                  type="submit"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/5 bg-white text-[#121312]/30 shadow-[0_1px_0_rgba(255,255,255,1)_inset] transition-colors hover:bg-red-50 hover:text-red-600 active:scale-95"
+                  aria-label={`Delete ${item.name}`}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </form>
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="divide-y divide-[#121312]/5">
-        {items.map((item, i) => (
-          <div
-            key={item.id}
-            className="animate-slide-in-left flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-[#F8F6F0]/50"
-            style={{ animationDelay: `${sectionDelay + 60 + i * 50}ms` }}
-          >
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-[#121312]">
-                {item.name}
-              </p>
-
-              <p className="mt-0.5 font-mono text-[10px] text-[#121312]/50">
-                {item.reaction ||
-                  item.dosage ||
-                  item.status ||
-                  item.date ||
-                  "Recorded"}
-              </p>
-            </div>
-
-            <form
-              action={async () => {
-                "use server";
-                await deleteHealthItem(type, item.id);
-              }}
-            >
-              <button
-                type="submit"
-                className="rounded-lg p-2 text-[#121312]/30 transition-colors hover:bg-red-50 hover:text-red-600"
-                aria-label={`Delete ${item.name}`}
-              >
-                <Trash2 size={14} />
-              </button>
-            </form>
-          </div>
-        ))}
-      </div>
-    </section>
+    </DoubleBorderCard>
   );
 }
 

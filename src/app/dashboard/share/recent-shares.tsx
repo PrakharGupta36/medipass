@@ -1,6 +1,8 @@
 "use client";
 
 import { DoubleBorderCard } from "@/components/ui/double-border-card";
+import { playHoverSound, playSelectSound } from "@/lib/sounds";
+import { play } from "cuelume";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
@@ -45,15 +47,22 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
   const status = getStatus(latest, now);
   const remainingCount = sessions.length - 1;
 
+  const handleOpenModal = () => {
+    playSelectSound();
+    setOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    play("droplet");
+    setOpen(false);
+  };
+
   return (
     <>
-      <DoubleBorderCard
-        variant="light"
-        className="w-full  p-3.5 sm:p-5"
-      >
+      <DoubleBorderCard variant="light" className="w-full p-3.5 sm:p-5">
         <div className="w-full">
           {/* Header Section */}
-          <div className="flex flex-col justify-between sm:flex-row gap-4 border-b border-black/10 pb-5">
+          <div className="flex flex-col justify-between border-b border-black/10 pb-5 gap-4 sm:flex-row">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-black/5 bg-[#E6E0D6] text-[#18392B]">
                 <History size={15} />
@@ -62,7 +71,7 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
                 <h2 className="truncate font-serif text-2xl font-semibold leading-tight text-[#121312] sm:text-lg">
                   Recent Shares
                 </h2>
-                <p className="truncate font-mono text-xs  font-medium uppercase tracking-wider text-[#121312]/50">
+                <p className="truncate font-mono text-xs font-medium uppercase tracking-wider text-[#121312]/50">
                   Latest access logs
                 </p>
               </div>
@@ -70,7 +79,10 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
 
             <button
               type="button"
-              onClick={() => setOpen(true)}
+              onMouseEnter={playHoverSound}
+              onClick={handleOpenModal}
+              data-cuelume-press="press"
+              data-cuelume-release="release"
               className="flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-black/10 bg-white px-2.5 font-mono text-[11px] font-semibold text-[#121312] shadow-2xs transition hover:bg-gray-50 active:scale-[0.98]"
             >
               <History size={12} className="text-[#121312]/60" />
@@ -141,10 +153,13 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
         {remainingCount > 0 && (
           <button
             type="button"
-            onClick={() => setOpen(true)}
-            className="group mt-2.5 flex w-full items-center justify-center gap-1 rounded-lg border border-black/5 bg-white/60 py-2 font-mono text-[11px] font-semibold text-[#121312]/70 transition hover:bg-white hover:text-[#18392B] active:scale-[0.99]"
+            onMouseEnter={playHoverSound}
+            onClick={handleOpenModal}
+            data-cuelume-press="press"
+            data-cuelume-release="release"
+            className="group mt-2.5 flex w-full items-center justify-center gap-1 rounded-lg border border-black/5 bg-white/60 py-2 font-mono text-xs font-semibold text-[#121312]/70 transition hover:bg-white hover:text-[#18392B] active:scale-[0.99]"
           >
-            <span>
+            <span className="text-sm">
               + {remainingCount} Previous{" "}
               {remainingCount === 1 ? "Session" : "Sessions"}
             </span>
@@ -156,7 +171,7 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
         )}
       </DoubleBorderCard>
 
-      {/* history modal */}
+      {/* History Modal */}
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
@@ -164,7 +179,7 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
+              onClick={handleCloseModal}
               className="absolute inset-0 bg-[#121312]/60 backdrop-blur-xs"
             />
 
@@ -193,14 +208,15 @@ export default function RecentShares({ sessions }: { sessions: Session[] }) {
 
                 <button
                   type="button"
-                  onClick={() => setOpen(false)}
+                  onMouseEnter={playHoverSound}
+                  onClick={handleCloseModal}
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-black/10 bg-[#F3EFE9] text-[#121312]/60 transition hover:bg-[#121312] hover:text-white"
                 >
                   <X size={14} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-3 space-y-2 [scrollbar-width:thin]">
+              <div className="flex-1 space-y-2 overflow-y-auto p-3 [scrollbar-width:thin]">
                 {sessions.map((session) => (
                   <SessionRow key={session.id} session={session} now={now} />
                 ))}
@@ -225,8 +241,14 @@ function SessionRow({ session, now }: { session: Session; now: number }) {
   const isActive = sessionStatus === "Active";
 
   const handleRevoke = () => {
+    play("loading");
     startTransition(async () => {
-      await revokeShareSession(session.id);
+      try {
+        await revokeShareSession(session.id);
+        play("droplet");
+      } catch {
+        play("error");
+      }
     });
   };
 
@@ -272,6 +294,7 @@ function SessionRow({ session, now }: { session: Session; now: number }) {
         {isActive && (
           <button
             type="button"
+            onMouseEnter={playHoverSound}
             onClick={handleRevoke}
             disabled={isPending}
             className="flex h-6 items-center gap-1 rounded-md border border-red-200 bg-red-50/80 px-2 font-mono text-[9px] font-bold uppercase tracking-wider text-red-700 transition hover:bg-red-600 hover:text-white disabled:opacity-50"

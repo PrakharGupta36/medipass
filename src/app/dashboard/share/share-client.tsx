@@ -1,7 +1,9 @@
 "use client";
 
 import { DoubleBorderCard } from "@/components/ui/double-border-card";
+import { playHoverSound, playSelectSound, playToggleSound } from "@/lib/sounds";
 import { toast } from "@/lib/toast";
+import { play } from "cuelume";
 import {
   AnimatePresence,
   motion,
@@ -75,6 +77,7 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
   }
 
   function generate() {
+    play("loading");
     const form = new FormData();
     form.set("duration", duration);
 
@@ -88,8 +91,10 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
         setToken(result.token);
         setExpiresAt(result.expiresAt);
         toast.success("Temporary access pass generated");
+        play("ready");
       } catch {
         toast.error("Failed to generate pass");
+        play("error");
       }
     });
   }
@@ -104,10 +109,13 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
     await navigator.clipboard.writeText(link);
     setCopied(true);
     toast.success("Link copied to clipboard");
+    play("success");
     setTimeout(() => setCopied(false), 2000);
   }
 
   function toggle(key: keyof typeof permissions) {
+    const willBeEnabled = !permissions[key];
+    playToggleSound(willBeEnabled);
     setPermissions((current) => ({
       ...current,
       [key]: !current[key],
@@ -220,6 +228,8 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                   <button
                     type="button"
                     onClick={copyLink}
+                    data-cuelume-press="press"
+                    data-cuelume-release="release"
                     className="flex h-10 items-center justify-center gap-2 rounded-lg bg-[#18392B] font-mono text-xs font-semibold text-[#F8F6F0] transition hover:bg-[#10271d]"
                   >
                     {copied ? <Check size={15} /> : <Copy size={15} />}
@@ -229,6 +239,8 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                     href={link}
                     target="_blank"
                     rel="noreferrer"
+                    data-cuelume-press="press"
+                    data-cuelume-release="release"
                     className="flex h-10 items-center justify-center gap-2 rounded-lg border border-black/10 bg-white font-mono text-xs font-semibold text-[#121312] transition hover:bg-gray-50"
                   >
                     <ExternalLink size={15} />
@@ -241,6 +253,8 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                   disabled={pending}
                   onClick={generate}
                   whileTap={{ scale: 0.98 }}
+                  data-cuelume-press="press"
+                  data-cuelume-release="release"
                   className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#18392B] font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] transition hover:bg-[#10271d] disabled:opacity-50"
                 >
                   <Sparkles size={15} />
@@ -249,7 +263,7 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
               )}
             </AnimatePresence>
 
-            <div className="rounded-xl border border-black/20 bg-[#E6E0D6]/40 p-3 mt-12">
+            <div className="mt-12 rounded-xl border border-black/20 bg-[#E6E0D6]/40 p-3">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-semibold text-[#121312]">
                   Access Duration
@@ -269,7 +283,11 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                     <button
                       key={fullValue}
                       type="button"
-                      onClick={() => setDuration(fullValue)}
+                      onMouseEnter={playHoverSound}
+                      onClick={() => {
+                        playSelectSound();
+                        setDuration(fullValue);
+                      }}
                       className={`relative rounded-md py-1.5 font-mono text-xs font-semibold transition-colors ${
                         active
                           ? "text-[#F8F6F0]"
@@ -329,6 +347,7 @@ export default function ShareClient({ sessions }: { sessions: Session[] }) {
                 <button
                   type="button"
                   key={key}
+                  onMouseEnter={playHoverSound}
                   onClick={() => toggle(key as keyof typeof permissions)}
                   className="flex min-h-[42px] items-center justify-between rounded-lg border border-black/5 bg-white/80 px-3.5 py-2 text-left transition hover:bg-white"
                 >

@@ -16,7 +16,6 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useRef, useState } from "react";
@@ -304,26 +303,8 @@ export default function AuthPage() {
               RIGHT — FORM PANEL
           ====================================================== */}
           <section className="relative flex h-full flex-col justify-between bg-white p-6 sm:p-8 lg:p-10">
-            {/* Header Navigation */}
-            <div className="flex items-center justify-between">
-              <Image
-                src="/logo-2.png"
-                alt="MediPass"
-                fill
-                sizes="190px"
-                className="
-          object-contain
-          transition-transform duration-300
-          group-hover:scale-[1.03]
-        "
-                priority
-              />
-
-              <div className="w-9 lg:hidden" />
-            </div>
-
             {/* Form Stage */}
-            <div className="mx-auto w-full max-w-[380px] py-2">
+            <div className="mx-auto my-auto w-full max-w-[380px] py-2">
               {/* Heading */}
               <div className="mb-6">
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#18392B]/10 text-[#18392B]">

@@ -1,3 +1,5 @@
+// src/app/dashboard/timeline/page.tsx
+
 import { createClient } from "@/lib/supabase/server";
 import {
   AlertTriangle,
@@ -5,8 +7,8 @@ import {
   HeartPulse,
   Pill,
   ShieldCheck,
-  Syringe,
   Stethoscope,
+  Syringe,
 } from "lucide-react";
 
 type TimelineEntry = {
@@ -55,33 +57,27 @@ export default async function TimelinePage() {
 
   const timeline: TimelineEntry[] = [];
 
-  // Medical events
   for (const event of events || []) {
     let icon: React.ReactNode;
 
     switch (event.event_type) {
       case "allergy":
-        icon = <AlertTriangle size={16} />;
+        icon = <AlertTriangle size={15} />;
         break;
-
       case "medication":
-        icon = <Pill size={16} />;
+        icon = <Pill size={15} />;
         break;
-
       case "vaccination":
-        icon = <Syringe size={16} />;
+        icon = <Syringe size={15} />;
         break;
-
       case "condition":
-        icon = <HeartPulse size={16} />;
+        icon = <HeartPulse size={15} />;
         break;
-
       case "doctor_visit":
-        icon = <Stethoscope size={16} />;
+        icon = <Stethoscope size={15} />;
         break;
-
       default:
-        icon = <HeartPulse size={16} />;
+        icon = <HeartPulse size={15} />;
     }
 
     timeline.push({
@@ -93,51 +89,53 @@ export default async function TimelinePage() {
     });
   }
 
-  // Medical reports
   for (const report of reports || []) {
     timeline.push({
       id: `report-${report.id}`,
       date: report.report_date || report.created_at.slice(0, 10),
       title: report.title,
       description: report.report_type || "Medical report",
-      icon: <FileText size={16} />,
+      icon: <FileText size={15} />,
     });
   }
 
-  // Profile creation
   if (profile) {
     timeline.push({
       id: "profile-created",
       date: profile.created_at.slice(0, 10),
-      title: "MediPass created",
-      description: "Your medical passport was created.",
-      icon: <ShieldCheck size={16} />,
+      title: "MediPass Created",
+      description:
+        "Your security credentials and medical profile were generated.",
+      icon: <ShieldCheck size={15} />,
     });
   }
 
   timeline.sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <div>
-      {/* Mobile heading */}
-      
-
-      <section className="rounded-[26px] border border-white/[0.07] bg-[#111712]">
-        <div className="border-b border-white/[0.06] px-6 py-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/25">
-            History
+    <div className="w-full text-[#121312]">
+      <section className="animate-rise-in rounded-3xl border border-[#121312]/10 bg-white shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]">
+        <div className="border-b border-[#121312]/10 px-6 py-5 sm:px-8">
+          <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#121312]/40">
+            Medical History
           </p>
 
-          <h2 className="mt-1 text-base font-semibold">Your medical journey</h2>
+          <h1 className="mt-1 font-serif text-2xl font-normal text-[#121312] sm:text-3xl">
+            Timeline Log
+          </h1>
 
-          <p className="mt-1 text-xs text-white/25">
-            Your health records and medical events appear here automatically.
+          <p className="mt-1 font-mono text-xs text-[#121312]/50">
+            Chronological log of diagnostic reports, prescriptions, and health
+            updates.
           </p>
         </div>
 
         <div className="relative px-6 py-8 sm:px-10">
           {timeline.length > 0 && (
-            <div className="absolute bottom-8 left-[42px] top-8 w-px bg-white/[0.07] sm:left-[58px]" />
+            <div
+              className="animate-grow-line absolute bottom-10 left-[41px] top-10 w-px bg-[#121312]/10 sm:left-[57px]"
+              style={{ animationDelay: "150ms" }}
+            />
           )}
 
           {timeline.length > 0 ? (
@@ -149,21 +147,25 @@ export default async function TimelinePage() {
                 description={item.description}
                 date={formatDate(item.date)}
                 active={index === 0}
+                delay={220 + index * 90}
               />
             ))
           ) : (
-            <div className="py-14 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.025] text-white/20">
-                <HeartPulse size={22} />
+            <div
+              className="animate-rise-in py-16 text-center"
+              style={{ animationDelay: "150ms" }}
+            >
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F8F6F0] text-[#121312]/30">
+                <HeartPulse size={20} />
               </div>
 
-              <h3 className="mt-4 text-sm font-medium text-white/60">
+              <h2 className="mt-4 font-serif text-lg font-normal text-[#121312]">
                 Your timeline is empty
-              </h3>
+              </h2>
 
-              <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-white/25">
-                Add allergies, medications, conditions, vaccinations or medical
-                reports and they will appear here.
+              <p className="mx-auto mt-1 max-w-sm font-mono text-xs text-[#121312]/40">
+                Add allergies, medications, conditions, vaccinations, or medical
+                reports to view your historical logs.
               </p>
             </div>
           )}
@@ -184,7 +186,7 @@ function formatDate(value: string) {
     return value;
   }
 
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -197,33 +199,43 @@ function TimelineItem({
   description,
   date,
   active = false,
+  delay = 0,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
   date: string;
   active?: boolean;
+  delay?: number;
 }) {
   return (
-    <div className="relative flex gap-5 pb-9 last:pb-0">
+    <div
+      className="animate-rise-in relative flex gap-5 pb-8 last:pb-0"
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <div
-        className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
+        className={`animate-pop-in relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors ${
           active
-            ? "border-[#62C58C]/30 bg-[#1F7A4F] text-[#A7E1BE]"
-            : "border-white/[0.08] bg-[#151B16] text-white/25"
+            ? "border-[#18392B] bg-[#18392B] text-[#F8F6F0]"
+            : "border-[#121312]/10 bg-[#F8F6F0] text-[#121312]/60"
         }`}
+        style={{ animationDelay: `${delay + 120}ms` }}
       >
         {icon}
       </div>
 
       <div className="min-w-0 flex-1 pt-1">
         <div className="flex items-start justify-between gap-4">
-          <p className="text-sm font-medium text-white/70">{title}</p>
+          <p className="text-xs font-semibold text-[#121312]">{title}</p>
 
-          <span className="shrink-0 text-[10px] text-white/20">{date}</span>
+          <span className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+            {date}
+          </span>
         </div>
 
-        <p className="mt-1 text-xs leading-5 text-white/30">{description}</p>
+        <p className="mt-1 text-xs text-[#121312]/60 leading-relaxed">
+          {description}
+        </p>
       </div>
     </div>
   );

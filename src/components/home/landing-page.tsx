@@ -1,3 +1,5 @@
+// src/app/page.tsx
+
 "use client";
 
 import {
@@ -8,43 +10,46 @@ import {
   Pill,
   QrCode,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-const RAISED =
-  "shadow-[0_1px_0.5px_#ffffff1a_inset,0_1px_1px_#ffffff35_inset,0_10px_10px_-9px_#00000070,0_20px_20px_-14px_#00000060,0_0px_6px_0px_#00000060]";
-
-const RAISED_CRISP =
-  "shadow-[0_0.5px_0px_#ffffff1a_inset,0_1px_0.5px_#ffffff25_inset,0_10px_10px_-9px_#00000070,0_20px_20px_-14px_#00000060,0_0px_6px_0px_#00000060]";
-
-const INSET = "shadow-[0_0.5px_0_#ffffff50,0_2px_6px_#00000090_inset]";
-
-const GRID_BG =
-  "linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)";
-
-const GRID_SIZE = "56px 56px";
-
 export default function LandingPage() {
   const router = useRouter();
   const pageRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const [pos, setPos] = useState({
-    x: 50,
-    y: 20,
-  });
-
+  // Smooth mouse coordinates for physics and lighting
+  const [pos, setPos] = useState({ x: 50, y: 20 });
+  const [cardTilt, setCardTilt] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = pageRef.current?.getBoundingClientRect();
-
     if (!rect) return;
 
-    setPos({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    });
+    // Track global mouse percentage
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    setPos({ x: xPct, y: yPct });
+
+    // Interactive 3D Card Tilt Calculation
+    if (cardRef.current) {
+      const cardRect = cardRef.current.getBoundingClientRect();
+      const cardX = e.clientX - cardRect.left - cardRect.width / 2;
+      const cardY = e.clientY - cardRect.top - cardRect.height / 2;
+
+      // Calculate rotation angles
+      const rotateX = (cardY / (cardRect.height / 2)) * -8;
+      const rotateY = (cardX / (cardRect.width / 2)) * 8;
+      setCardTilt({ x: rotateX, y: rotateY });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    setCardTilt({ x: 0, y: 0 });
   };
 
   return (
@@ -52,274 +57,274 @@ export default function LandingPage() {
       ref={pageRef}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#0f0f0f] text-[#ececec]"
+      onMouseLeave={handleMouseLeave}
+      className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#F4F0EA] text-[#121312] selection:bg-[#18392B] selection:text-[#F8F6F0]"
     >
-      {/* Grain */}
+      {/* 1. Fine Film Grain Texture Overaly */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 opacity-[0.045] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.035] mix-blend-multiply"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
         }}
       />
 
-      {/* Base grid */}
+      {/* 2. Warm Architectural Grid Background */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 opacity-[0.035]"
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.04]"
         style={{
-          backgroundImage: GRID_BG,
-          backgroundSize: GRID_SIZE,
+          backgroundImage: `linear-gradient(#121312 1px, transparent 1px), linear-gradient(90deg, #121312 1px, transparent 1px)`,
+          backgroundSize: "64px 64px",
         }}
       />
 
-      {/* Cursor grid */}
+      {/* 3. Interactive Mouse Revealing Grid */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 hidden transition-opacity duration-300 lg:block"
+        className="pointer-events-none absolute inset-0 z-0 hidden transition-opacity duration-500 lg:block"
         style={{
-          backgroundImage: GRID_BG,
-          backgroundSize: GRID_SIZE,
-          opacity: isHovering ? 0.25 : 0,
-          WebkitMaskImage: `radial-gradient(260px circle at ${pos.x}% ${pos.y}%, black, transparent 70%)`,
-          maskImage: `radial-gradient(260px circle at ${pos.x}% ${pos.y}%, black, transparent 70%)`,
+          backgroundImage: `linear-gradient(#18392B 1px, transparent 1px), linear-gradient(90deg, #18392B 1px, transparent 1px)`,
+          backgroundSize: "64px 64px",
+          opacity: isHovering ? 0.2 : 0,
+          WebkitMaskImage: `radial-gradient(320px circle at ${pos.x}% ${pos.y}%, black, transparent 80%)`,
+          maskImage: `radial-gradient(320px circle at ${pos.x}% ${pos.y}%, black, transparent 80%)`,
         }}
       />
 
-      {/* Cursor glow */}
+      {/* 4. Warm Dynamic Spotlight Aura */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 hidden transition-[background] duration-300 lg:block"
+        className="pointer-events-none absolute inset-0 z-0 hidden transition-all duration-300 ease-out lg:block"
         style={{
-          background: `radial-gradient(820px circle at ${pos.x}% ${pos.y}%, rgba(76,169,124,0.06), transparent 45%)`,
+          background: `radial-gradient(750px circle at ${pos.x}% ${pos.y}%, rgba(24, 57, 43, 0.08), transparent 50%)`,
         }}
       />
 
-      {/* Atmosphere */}
-      <div className="pointer-events-none absolute -right-24 -top-24 z-0 h-[280px] w-[280px] rounded-full bg-[#1f6b46] blur-[100px] opacity-[0.12] sm:-right-40 sm:-top-40 sm:h-[420px] sm:w-[420px] lg:-right-52 lg:-top-52 lg:h-[640px] lg:w-[640px] lg:blur-[170px]" />
+      {/* 5. Editorial Ambient Glow Orbs */}
+      <div className="pointer-events-none absolute -right-20 -top-20 z-0 h-[380px] w-[380px] rounded-full bg-[#18392B] opacity-[0.07] blur-[120px] sm:h-[600px] sm:w-[600px] sm:blur-[180px]" />
+      <div className="pointer-events-none absolute -bottom-20 -left-20 z-0 h-[320px] w-[320px] rounded-full bg-[#C9A227] opacity-[0.06] blur-[120px] sm:h-[500px] sm:w-[500px] sm:blur-[180px]" />
 
-      <div className="pointer-events-none absolute -bottom-28 -left-28 z-0 h-[260px] w-[260px] rounded-full bg-[#1f6b46] blur-[100px] opacity-[0.08] sm:-bottom-40 sm:-left-40 sm:h-[380px] sm:w-[380px] lg:-bottom-56 lg:-left-56 lg:h-[560px] lg:w-[560px] lg:blur-[170px]" />
-
-      {/* Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 pb-8 pt-5 sm:px-8 sm:pt-8 lg:px-20 lg:pb-10 lg:pt-10">
-        {/* Navbar */}
+      {/* Primary Layout Container */}
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pb-8 pt-6 sm:px-10 lg:px-16 lg:pb-12 lg:pt-10">
+        {/* Navigation Bar */}
         <nav className="flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3.5">
-            <div
-              className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-b from-[#2c6b4c] to-[#20553b] text-[#eafff3] sm:h-11 sm:w-11 sm:rounded-2xl lg:h-12 lg:w-12 ${RAISED}`}
-            >
-              <HeartPulse size={18} strokeWidth={2.3} className="sm:hidden" />
-
+          <div className="flex items-center gap-3">
+            <div className="group relative flex h-10 w-10 items-center justify-center rounded-2xl bg-[#121312] text-[#F8F6F0] shadow-md transition-transform duration-300 hover:scale-105 sm:h-11 sm:w-11">
               <HeartPulse
-                size={22}
-                strokeWidth={2.3}
-                className="hidden sm:block"
+                size={20}
+                strokeWidth={2}
+                className="transition-transform duration-300 group-hover:rotate-12"
               />
             </div>
 
-            <span className="text-lg font-semibold tracking-[-0.03em] text-white sm:text-xl lg:text-2xl">
+            <span className="font-serif text-xl font-normal tracking-tight text-[#121312] sm:text-2xl">
               MediPass
             </span>
           </div>
 
           <button
             onClick={() => router.push("/auth")}
-            className={`rounded-full bg-gradient-to-b from-[#202020] to-[#191919] px-4 py-2 text-sm font-medium text-white/60 transition-all duration-150 hover:text-white active:scale-[0.97] sm:px-6 sm:py-3 sm:text-base ${RAISED}`}
+            className="group relative overflow-hidden rounded-full border border-[#121312]/15 bg-white px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-[#121312] shadow-xs transition-all hover:border-[#121312] hover:shadow-md active:scale-95 sm:px-6 sm:py-3"
           >
-            Sign in
+            <span className="relative z-10 transition-colors duration-300 group-hover:text-[#F8F6F0]">
+              Sign in
+            </span>
+            <div className="absolute inset-0 z-0 translate-y-full bg-[#121312] transition-transform duration-300 ease-out group-hover:translate-y-0" />
           </button>
         </nav>
 
-        {/* Hero */}
-        <section className="flex flex-1 flex-col items-center justify-center gap-10 py-10 text-center sm:gap-14 sm:py-14 lg:flex-row lg:gap-24 lg:py-16 lg:text-left">
-          <div className="w-full max-w-md sm:max-w-xl lg:max-w-2xl">
-            <div
-              className={`animate-fade-up mb-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-[#191919] to-[#151515] px-3.5 py-2 text-[11px] font-medium text-white/60 sm:mb-7 sm:px-4 sm:py-2.5 sm:text-xs lg:mb-9 ${RAISED}`}
-            >
-              <ShieldCheck size={13} className="shrink-0 text-[#4CA97C]" />
-
-              <span>Your health. Your record. Your control.</span>
+        {/* Hero Section */}
+        <section className="flex flex-1 flex-col items-center justify-center gap-12 py-10 sm:py-16 lg:flex-row lg:gap-20 lg:py-20 lg:text-left">
+          {/* Main Editorial Copy */}
+          <div className="w-full max-w-xl lg:max-w-2xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#18392B]/20 bg-[#18392B]/5 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#18392B] backdrop-blur-md sm:mb-8 sm:text-xs">
+              <ShieldCheck size={14} className="shrink-0 text-[#18392B]" />
+              <span>Sovereign Record · End-to-End Encrypted</span>
             </div>
 
-            <h1
-              className="animate-fade-up text-[2.25rem] leading-[1.12] tracking-[-0.02em] text-white sm:text-6xl sm:leading-[1.06] lg:text-[clamp(3rem,5.2vw,4.75rem)] [font-family:var(--font-fraunces)]"
-              style={{ animationDelay: "80ms" }}
-            >
-              <span className="block sm:whitespace-nowrap font-medium">
-                Your medical history,
-              </span>
-
-              <span className="block sm:whitespace-nowrap font-medium italic text-[#5CBA8A]">
+            <h1 className="font-serif text-4xl leading-[1.08] tracking-tight text-[#121312] sm:text-6xl lg:text-[clamp(3.5rem,5.5vw,5.25rem)]">
+              Your medical history,{" "}
+              <span className="relative inline-block italic text-[#18392B]">
                 wherever you go.
+                <svg
+                  className="absolute -bottom-1 left-0 w-full text-[#18392B]/30"
+                  viewBox="0 0 100 20"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M0,15 Q50,5 100,15"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                </svg>
               </span>
             </h1>
 
-            <p
-              className="animate-fade-up mx-auto mt-5 max-w-md text-[15px] leading-7 text-white/50 sm:mt-8 sm:text-lg sm:leading-8 sm:text-white/70 lg:mx-0"
-              style={{ animationDelay: "160ms" }}
-            >
-              One secure place for your medical history, medications, allergies,
-              reports and more. Share it with any doctor in seconds.
+            <p className="mx-auto mt-6 max-w-md font-mono text-sm leading-relaxed text-[#121312]/70 sm:mt-8 sm:text-base lg:mx-0">
+              One unified, encrypted vault for your medical timeline, active
+              prescriptions, allergies, and lab diagnostics. Shareable in
+              seconds.
             </p>
 
-            <div
-              className="animate-fade-up mt-7 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:items-start sm:gap-4"
-              style={{ animationDelay: "240ms" }}
-            >
+            <div className="mt-8 flex flex-col items-stretch gap-4 sm:mt-10 sm:flex-row sm:items-center lg:justify-start">
               <button
                 onClick={() => router.push("/auth")}
-                className={`group flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#2c6b4c] to-[#20553b] px-6 text-sm font-semibold text-[#eafff3] transition-all duration-150 hover:-translate-y-0.5 active:scale-[0.97] sm:h-14 sm:w-auto sm:px-7 sm:text-base ${RAISED}`}
+                className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-[#121312] px-8 font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-lg transition-all hover:bg-[#18392B] hover:shadow-xl active:scale-[0.98] sm:w-auto"
               >
-                Create your health passport
+                <span>Create Health Passport</span>
                 <ArrowRight
-                  size={17}
-                  className="shrink-0 transition-transform group-hover:translate-x-0.5"
+                  size={16}
+                  className="shrink-0 transition-transform duration-300 group-hover:translate-x-1"
                 />
               </button>
 
               <button
                 onClick={() => router.push("/auth")}
-                className="h-12 w-full rounded-2xl px-6 text-sm font-medium text-white/45 transition hover:bg-white/[0.04] hover:text-white sm:h-14 sm:w-auto sm:text-base"
+                className="h-14 w-full rounded-2xl border border-[#121312]/15 bg-white/80 px-8 font-mono text-xs font-semibold uppercase tracking-wider text-[#121312] shadow-xs backdrop-blur-sm transition-all hover:border-[#121312] hover:bg-white active:scale-[0.98] sm:w-auto"
               >
-                I already have an account
+                Existing Account
               </button>
             </div>
           </div>
 
-          {/* Passport visual */}
+          {/* Interactive Passport Visual Artifact */}
           <div
-            className="animate-fade-up w-full max-w-[280px] shrink-0 sm:max-w-[340px] lg:max-w-[420px]"
-            style={{ animationDelay: "180ms" }}
+            ref={cardRef}
+            className="w-full max-w-[320px] shrink-0 sm:max-w-[380px] lg:max-w-[420px]"
+            style={{
+              perspective: "1000px",
+            }}
           >
-            <div className="relative">
-              <div
-                className={`absolute -right-3 -top-5 z-10 flex items-center gap-2.5 rounded-2xl bg-gradient-to-b from-[#202020] to-[#191919] p-3 sm:-right-5 sm:-top-8 sm:gap-3.5 sm:p-4 lg:-right-9 ${RAISED}`}
-              >
-                <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-xl bg-[#131313] text-white/70 sm:h-11 sm:w-11 ${INSET}`}
-                >
-                  <QrCode size={15} className="sm:hidden" />
-                  <QrCode size={19} className="hidden sm:block" />
+            <div
+              className="relative transition-transform duration-200 ease-out"
+              style={{
+                transform: `rotateX(${cardTilt.x}deg) rotateY(${cardTilt.y}deg)`,
+                transformStyle: "preserve-3d",
+              }}
+            >
+              {/* Floating QR Badge */}
+              <div className="absolute -right-3 -top-6 z-20 flex items-center gap-3 rounded-2xl border border-[#121312]/10 bg-white/90 p-4 shadow-xl backdrop-blur-md transition-transform duration-300 hover:scale-105 sm:-right-6 sm:-top-8">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F4F0EA] text-[#18392B]">
+                  <QrCode size={18} />
                 </div>
 
                 <div className="text-left">
-                  <p className="text-xs font-semibold text-white sm:text-sm">
-                    Share instantly
+                  <p className="font-serif text-sm font-medium text-[#121312]">
+                    Instant Access
                   </p>
 
-                  <p className="text-[10px] text-white/35 sm:text-xs">
-                    With any doctor
+                  <p className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+                    Provider Token
                   </p>
                 </div>
               </div>
 
-              <div
-                className={`rotate-[-1.5deg] rounded-[24px] bg-gradient-to-b from-[#212121] to-[#191919] p-4 transition-transform duration-500 hover:rotate-0 sm:rounded-[32px] sm:p-6 ${RAISED_CRISP}`}
-              >
+              {/* Main Outer Passport Envelope */}
+              <div className="relative overflow-hidden rounded-[32px] border border-[#121312]/10 bg-white p-6 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.06)] sm:p-8">
+                {/* Dynamic Shine Light Beam */}
                 <div
-                  className={`relative overflow-hidden rounded-[18px] bg-gradient-to-b from-[#121412] to-[#0d0f0d] p-4 sm:rounded-[24px] sm:p-6 ${INSET}`}
-                >
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/[0.05] to-transparent sm:h-20" />
+                  className="pointer-events-none absolute -inset-full z-10 opacity-30 transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(circle at ${pos.x}% ${pos.y}%, rgba(255,255,255,0.8) 0%, transparent 60%)`,
+                  }}
+                />
 
-                  <div className="relative flex items-start justify-between">
+                {/* Inner Card Blueprint Surface */}
+                <div className="relative rounded-[24px] border border-[#121312]/10 bg-[#F8F6F0] p-5 sm:p-6">
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between border-b border-[#121312]/10 pb-4">
                     <div className="text-left">
-                      <p className="text-[9px] uppercase tracking-[0.18em] text-white/30 sm:text-[11px]">
+                      <p className="font-mono text-[9px] uppercase tracking-widest text-[#121312]/40">
                         Medical Passport
                       </p>
 
-                      <p className="mt-1 text-base font-semibold tracking-tight text-white sm:mt-1.5 sm:text-xl">
+                      <p className="font-serif text-xl font-normal text-[#121312]">
                         MediPass
                       </p>
                     </div>
 
-                    <div
-                      className={`flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-b from-[#2c6b4c] to-[#20553b] sm:h-10 sm:w-10 sm:rounded-xl ${RAISED}`}
-                    >
-                      <HeartPulse
-                        size={13}
-                        className="text-[#eafff3] sm:hidden"
-                      />
-
-                      <HeartPulse
-                        size={16}
-                        className="hidden text-[#eafff3] sm:block"
-                      />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#18392B] text-[#F8F6F0] shadow-xs">
+                      <HeartPulse size={16} />
                     </div>
                   </div>
 
-                  <div className="relative mt-8 text-left sm:mt-14">
-                    <p className="text-xs text-white/30 sm:text-sm">Patient</p>
+                  {/* Patient Info */}
+                  <div className="mt-8 text-left">
+                    <p className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+                      Passport Holder
+                    </p>
 
-                    <p className="mt-1 text-lg font-medium text-white sm:mt-1.5 sm:text-2xl">
-                      Your Medical Record
+                    <p className="mt-1 font-serif text-2xl font-normal text-[#121312]">
+                      Unified Patient Vault
                     </p>
                   </div>
 
-                  <div className="relative mt-5 grid grid-cols-2 gap-2 sm:mt-8 sm:gap-2.5">
-                    <div
-                      className={`rounded-xl bg-[#0a0c0a] p-2.5 text-left sm:rounded-2xl sm:p-4 ${INSET}`}
-                    >
-                      <p className="text-[9px] text-white/30 sm:text-[11px]">
+                  {/* Status Grid Badges */}
+                  <div className="mt-8 grid grid-cols-2 gap-2.5">
+                    <div className="rounded-xl border border-[#121312]/10 bg-white p-3 text-left shadow-2xs">
+                      <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40">
                         ALLERGIES
                       </p>
 
-                      <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-white/80 sm:mt-1.5 sm:gap-2 sm:text-base">
-                        <Lock size={11} className="shrink-0 text-[#4CA97C]" />
-                        Protected
+                      <p className="mt-1 flex items-center gap-1.5 font-mono text-xs font-semibold text-[#18392B]">
+                        <Lock size={10} />
+                        Encrypted
                       </p>
                     </div>
 
-                    <div
-                      className={`rounded-xl bg-[#0a0c0a] p-2.5 text-left sm:rounded-2xl sm:p-4 ${INSET}`}
-                    >
-                      <p className="text-[9px] text-white/30 sm:text-[11px]">
+                    <div className="rounded-xl border border-[#121312]/10 bg-white p-3 text-left shadow-2xs">
+                      <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40">
                         MEDICATIONS
                       </p>
 
-                      <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-white/80 sm:mt-1.5 sm:gap-2 sm:text-base">
-                        <Pill size={11} className="shrink-0 text-[#4CA97C]" />
-                        Protected
+                      <p className="mt-1 flex items-center gap-1.5 font-mono text-xs font-semibold text-[#18392B]">
+                        <Pill size={10} />
+                        Verified
                       </p>
                     </div>
                   </div>
 
-                  <div
-                    className={`relative mt-2 rounded-xl bg-[#0a0c0a] p-2.5 text-left sm:mt-2.5 sm:rounded-2xl sm:p-4 ${INSET}`}
-                  >
-                    <p className="text-[9px] text-white/30 sm:text-[11px]">
-                      MEDICAL HISTORY
+                  <div className="mt-2.5 rounded-xl border border-[#121312]/10 bg-white p-3 text-left shadow-2xs">
+                    <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40">
+                      TIMELINE RECORD
                     </p>
 
-                    <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-white/80 sm:mt-1.5 sm:gap-2 sm:text-base">
-                      <FileText size={11} className="shrink-0 text-[#4CA97C]" />
-                      Always with you
+                    <p className="mt-1 flex items-center gap-1.5 font-mono text-xs font-semibold text-[#121312]">
+                      <FileText size={10} className="text-[#18392B]" />
+                      Continuously Synced
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div
-                className={`absolute -bottom-4 -left-4 rounded-xl bg-gradient-to-b from-[#202020] to-[#191919] px-3.5 py-3 text-left sm:-bottom-6 sm:-left-6 sm:rounded-2xl sm:px-5 sm:py-4 ${RAISED}`}
-              >
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#4CA97C] sm:h-2 sm:w-2" />
+              {/* Floating Security Badge */}
+              <div className="absolute -bottom-5 -left-3 rounded-2xl border border-[#121312]/10 bg-white px-5 py-3.5 text-left shadow-xl backdrop-blur-md sm:-bottom-6 sm:-left-6">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18392B]" />
+                  </span>
 
-                  <span className="text-xs font-semibold text-white sm:text-sm">
-                    Secure & private
+                  <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#121312]">
+                    Zero Knowledge Architecture
                   </span>
                 </div>
 
-                <p className="mt-1 text-[10px] text-white/30 sm:mt-1.5 sm:text-xs">
-                  You control who sees your records
+                <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+                  Full User Authorization Control
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <div className="pt-4 sm:pt-6">
-          <p className="text-center text-xs text-white/25 sm:text-sm">
-            One patient. One medical history. Anywhere.
+       
+
+        {/* Footer */}
+        <footer className="pt-6 text-center">
+          <p className="font-mono text-xs uppercase tracking-wider text-[#121312]/40">
+            One Patient · Universal Medical History · Sovereign Control
           </p>
-        </div>
+        </footer>
       </div>
     </main>
   );

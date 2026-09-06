@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // src/app/share/[token]/page.tsx
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -33,7 +33,9 @@ export default async function SharedRecordPage({
   if (error || !data?.ok) {
     return (
       <InvalidShare
-        message={data?.error || "This share link is unavailable."}
+        message={
+          data?.error || "This share link is unavailable or has expired."
+        }
       />
     );
   }
@@ -42,71 +44,67 @@ export default async function SharedRecordPage({
   const profile = record.profile;
 
   return (
-    <main className="min-h-screen bg-[#080D0A] px-4 py-8 text-white sm:px-6">
-      <div className="mx-auto max-w-4xl">
-        {/* ================================================ */}
+    <main className="min-h-screen bg-[#F8F6F0] px-4 py-8 text-[#121312] sm:px-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
-        {/* ================================================ */}
-
-        <header className="flex items-center justify-between">
+        <header className="flex items-center justify-between border-b border-[#121312]/10 pb-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1F7A4F]">
-              <HeartPulse size={19} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#18392B] text-[#F8F6F0]">
+              <HeartPulse size={20} />
             </div>
 
             <div>
-              <p className="font-semibold">MediPass</p>
+              <p className="font-serif text-lg font-normal text-[#121312]">
+                MediPass
+              </p>
 
-              <p className="text-[9px] uppercase tracking-[0.14em] text-white/25">
-                Shared medical record
+              <p className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+                Shared Medical Passport
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-[10px] text-[#62C58C]">
+          <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-[#18392B]">
             <ShieldCheck size={14} />
-            Temporary access
+            <span>Temporary Access</span>
           </div>
         </header>
 
-        {/* ================================================ */}
-        {/* Patient */}
-        {/* ================================================ */}
-
-        <section className="mt-8 rounded-[26px] border border-white/[0.07] bg-[#111712] p-6 sm:p-8">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#62C58C]">
-            Patient record
+        {/* Patient Identity Header */}
+        <section className="rounded-3xl border border-[#121312]/10 bg-white p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] sm:p-8">
+          <p className="font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312]/40">
+            Patient Medical Record
           </p>
 
-          <h1 className="mt-2 text-2xl font-semibold">
-            {profile?.full_name || "Medical patient"}
+          <h1 className="mt-1 font-serif text-3xl font-normal text-[#121312]">
+            {profile?.full_name || "Anonymous Patient"}
           </h1>
 
-          <p className="mt-1 text-xs text-white/30">
-            This information was explicitly shared by the patient.
+          <p className="mt-1 text-xs text-[#121312]/60">
+            Explicitly authorized temporary medical view.
           </p>
 
-          <p className="mt-5 text-[10px] text-white/20">
-            Access expires {new Date(data.expires_at).toLocaleString()}
-          </p>
+          <div className="mt-6 inline-flex items-center gap-2 rounded-xl border border-[#121312]/10 bg-[#F8F6F0] px-3 py-2 font-mono text-[9px] uppercase tracking-wider text-[#121312]/50">
+            <span>Access Expires:</span>
+            <span className="font-semibold text-[#121312]">
+              {new Date(data.expires_at).toLocaleString()}
+            </span>
+          </div>
         </section>
 
-        {/* ================================================ */}
-        {/* Basic profile */}
-        {/* ================================================ */}
-
+        {/* Basic Profile */}
         {profile && (
-          <Section title="Basic profile" icon={<UserRound size={17} />}>
+          <Section title="Basic Profile" icon={<UserRound size={18} />}>
             <Grid
               items={[
-                ["Blood group", profile.blood_group || "Not provided"],
+                ["Blood Group", profile.blood_group || "Not provided"],
 
-                ["Date of birth", profile.date_of_birth || "Not provided"],
+                ["Date of Birth", profile.date_of_birth || "Not provided"],
 
-                ["Phone", profile.phone || "Not provided"],
+                ["Phone Number", profile.phone || "Not provided"],
 
                 [
-                  "Emergency contact",
+                  "Emergency Contact",
                   profile.emergency_contact_name
                     ? `${profile.emergency_contact_name}${
                         profile.emergency_contact_phone
@@ -120,68 +118,50 @@ export default async function SharedRecordPage({
           </Section>
         )}
 
-        {/* ================================================ */}
         {/* Allergies */}
-        {/* ================================================ */}
-
         <RecordSection
           title="Allergies"
-          icon={<AlertTriangle size={17} />}
+          icon={<AlertTriangle size={18} />}
           items={record.allergies}
           empty="No allergies shared."
           fields={["name", "reaction", "severity"]}
         />
 
-        {/* ================================================ */}
         {/* Medications */}
-        {/* ================================================ */}
-
         <RecordSection
           title="Medications"
-          icon={<Pill size={17} />}
+          icon={<Pill size={18} />}
           items={record.medications}
           empty="No medications shared."
           fields={["name", "dosage", "frequency"]}
         />
 
-        {/* ================================================ */}
         {/* Conditions */}
-        {/* ================================================ */}
-
         <RecordSection
           title="Conditions"
-          icon={<HeartPulse size={17} />}
+          icon={<HeartPulse size={18} />}
           items={record.conditions}
-          empty="No conditions shared."
+          empty="No medical conditions shared."
           fields={["name", "status", "diagnosed_date"]}
         />
 
-        {/* ================================================ */}
         {/* Vaccinations */}
-        {/* ================================================ */}
-
         <RecordSection
           title="Vaccinations"
-          icon={<Syringe size={17} />}
+          icon={<Syringe size={18} />}
           items={record.vaccinations}
-          empty="No vaccinations shared."
+          empty="No vaccination records shared."
           fields={["name", "date", "next_due_date"]}
         />
 
-        {/* ================================================ */}
-        {/* Medical reports */}
-        {/* ================================================ */}
-
+        {/* Medical Reports */}
         <MedicalReportsSection token={token} reports={record.reports} />
       </div>
     </main>
   );
 }
 
-/* ======================================================== */
 /* Medical Reports */
-/* ======================================================== */
-
 function MedicalReportsSection({
   token,
   reports,
@@ -190,7 +170,7 @@ function MedicalReportsSection({
   reports: any[];
 }) {
   return (
-    <Section title="Medical reports" icon={<FileText size={17} />}>
+    <Section title="Medical Reports" icon={<FileText size={18} />}>
       <div className="mt-4 space-y-2">
         {reports?.length ? (
           reports.map((report: any) => (
@@ -199,37 +179,31 @@ function MedicalReportsSection({
               href={`/share/${token}/reports/${report.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 rounded-2xl border border-white/[0.05] bg-white/[0.02] p-4 transition hover:border-[#62C58C]/20 hover:bg-[#101812]"
+              className="group flex items-center gap-4 rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4 transition-colors hover:bg-[#F8F6F0]"
             >
-              {/* File icon */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#62C58C]/10 bg-[#1F7A4F]/10 text-[#62C58C] transition group-hover:border-[#62C58C]/20 group-hover:bg-[#1F7A4F]/15">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#18392B] border border-[#121312]/10">
                 <FileText size={16} />
               </div>
 
-              {/* Report information */}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-white/65 transition group-hover:text-white/90">
+                <p className="truncate text-xs font-semibold text-[#121312]">
                   {report.title}
                 </p>
 
-                <p className="mt-1 text-[9px] text-white/20">
-                  {report.report_type || "Medical report"}
-
-                  {" · "}
-
+                <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
+                  {report.report_type || "Medical Report"} {" · "}
                   {formatReportDate(report.report_date)}
                 </p>
               </div>
 
-              {/* Open */}
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white/10 transition group-hover:bg-[#1F7A4F]/10 group-hover:text-[#62C58C]">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#121312]/10 bg-white text-[#121312]/40 transition-colors group-hover:bg-[#18392B] group-hover:text-[#F8F6F0]">
                 <ExternalLink size={14} />
               </div>
             </a>
           ))
         ) : (
-          <p className="rounded-xl border border-dashed border-white/[0.06] p-5 text-xs text-white/25">
-            No reports shared.
+          <p className="rounded-2xl border border-dashed border-[#121312]/20 p-5 font-mono text-xs text-[#121312]/40 text-center">
+            No medical reports shared.
           </p>
         )}
       </div>
@@ -237,10 +211,7 @@ function MedicalReportsSection({
   );
 }
 
-/* ======================================================== */
-/* Generic section */
-/* ======================================================== */
-
+/* Generic Section Container */
 function Section({
   title,
   icon,
@@ -251,11 +222,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-5 rounded-[26px] border border-white/[0.07] bg-[#111712] p-6">
-      <div className="flex items-center gap-3">
-        <div className="text-[#62C58C]">{icon}</div>
+    <section className="rounded-3xl border border-[#121312]/10 bg-white p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] sm:p-8">
+      <div className="flex items-center gap-3 border-b border-[#121312]/10 pb-4">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F8F6F0] text-[#18392B]">
+          {icon}
+        </div>
 
-        <h2 className="text-sm font-semibold">{title}</h2>
+        <h2 className="font-serif text-lg font-normal text-[#121312]">
+          {title}
+        </h2>
       </div>
 
       {children}
@@ -263,33 +238,27 @@ function Section({
   );
 }
 
-/* ======================================================== */
-/* Basic profile grid */
-/* ======================================================== */
-
+/* Basic Profile Grid */
 function Grid({ items }: { items: string[][] }) {
   return (
     <div className="mt-5 grid gap-3 sm:grid-cols-2">
       {items.map(([label, value]) => (
         <div
           key={label}
-          className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-4"
+          className="rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4"
         >
-          <p className="text-[9px] uppercase tracking-[0.12em] text-white/20">
+          <p className="font-mono text-[9px] uppercase tracking-wider text-[#121312]/40">
             {label}
           </p>
 
-          <p className="mt-2 text-xs text-white/60">{value}</p>
+          <p className="mt-1 text-xs font-semibold text-[#121312]">{value}</p>
         </div>
       ))}
     </div>
   );
 }
 
-/* ======================================================== */
-/* Generic medical record section */
-/* ======================================================== */
-
+/* Generic Itemized Medical Record Section */
 function RecordSection({
   title,
   icon,
@@ -310,13 +279,13 @@ function RecordSection({
           items.map((item: any) => (
             <div
               key={item.id}
-              className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-4"
+              className="rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/40 p-4"
             >
-              <p className="text-xs font-medium text-white/65">
+              <p className="text-xs font-semibold text-[#121312]">
                 {item[fields[0]]}
               </p>
 
-              <p className="mt-1 text-[10px] text-white/25">
+              <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-[#121312]/50">
                 {fields
                   .slice(1)
                   .map((field) => item[field])
@@ -326,7 +295,7 @@ function RecordSection({
             </div>
           ))
         ) : (
-          <p className="rounded-xl border border-dashed border-white/[0.06] p-5 text-xs text-white/25">
+          <p className="rounded-2xl border border-dashed border-[#121312]/20 p-5 font-mono text-xs text-[#121312]/40 text-center">
             {empty}
           </p>
         )}
@@ -335,33 +304,31 @@ function RecordSection({
   );
 }
 
-/* ======================================================== */
-/* Invalid share */
-/* ======================================================== */
-
+/* Invalid Share State */
 function InvalidShare({ message }: { message: string }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#080D0A] px-6 text-white">
-      <div className="w-full max-w-md rounded-[26px] border border-white/[0.07] bg-[#111712] p-8 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-300">
+    <main className="flex min-h-screen items-center justify-center bg-[#F8F6F0] px-6 text-[#121312]">
+      <div className="w-full max-w-md rounded-3xl border border-[#121312]/10 bg-white p-8 text-center shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-700">
           <AlertTriangle size={22} />
         </div>
 
-        <h1 className="mt-5 text-xl font-semibold">Share link unavailable</h1>
+        <h1 className="mt-5 font-serif text-xl font-normal text-[#121312]">
+          Share Link Unavailable
+        </h1>
 
-        <p className="mt-2 text-xs leading-5 text-white/30">{message}</p>
+        <p className="mt-2 font-mono text-xs text-[#121312]/60 leading-relaxed">
+          {message}
+        </p>
       </div>
     </main>
   );
 }
 
-/* ======================================================== */
-/* Date formatting */
-/* ======================================================== */
-
+/* Date Formatting */
 function formatReportDate(value: string | null | undefined) {
   if (!value) {
-    return "No date";
+    return "No Date";
   }
 
   const date = new Date(`${value}T00:00:00`);

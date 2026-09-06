@@ -1,5 +1,8 @@
+// src/app/dashboard/settings/settings-client.tsx
+
 "use client";
 
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell,
   Check,
@@ -11,6 +14,7 @@ import {
   ShieldCheck,
   Trash2,
   UserRound,
+  ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
@@ -22,6 +26,31 @@ import {
   updateNotifications,
 } from "./actions";
 
+// Motion Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 14 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 260,
+      damping: 24,
+    },
+  },
+};
+
 export default function SettingsClient({
   email,
   emailVerified,
@@ -32,16 +61,12 @@ export default function SettingsClient({
   notificationsEnabled: boolean;
 }) {
   const [notifications, setNotifications] = useState(notificationsEnabled);
-
   const [savingNotifications, startNotificationTransition] = useTransition();
-
   const [sendingPasswordReset, startPasswordTransition] = useTransition();
-
   const [resendingVerification, startVerificationTransition] = useTransition();
 
   function handleNotificationChange() {
     const nextValue = !notifications;
-
     setNotifications(nextValue);
 
     startNotificationTransition(async () => {
@@ -97,61 +122,27 @@ export default function SettingsClient({
   }
 
   return (
-    <div className="w-full">
-      {/* =========================================================
-          INTRO
-      ========================================================== */}
-
-      {/* <div className="mb-7 sm:mb-9">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#62C58C] shadow-[0_0_8px_rgba(98,197,140,0.45)]" />
-
-          <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#62C58C]/65">
-            Account settings
-          </p>
-        </div>
-
-        <div className="mt-3 flex items-end justify-between gap-5">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-[-0.045em] text-white sm:text-4xl">
-              Settings
-            </h1>
-
-            <p className="mt-2 max-w-lg text-xs leading-5 text-white/30 sm:text-sm">
-              Manage your account, security and MediPass preferences.
-            </p>
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="font-mono text-[8px] uppercase tracking-[0.15em] text-white/15">
-              MEDIPASS
-            </span>
-
-            <span className="h-px w-6 bg-white/[0.08]" />
-
-            <span className="font-mono text-[8px] text-white/15">01</span>
-          </div>
-        </div>
-      </div> */}
-
-      {/* =========================================================
-          SETTINGS
-      ========================================================== */}
-
-      <div className="space-y-5">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="w-full text-[#121312] space-y-6 sm:space-y-8"
+    >
+      {/* SETTINGS SECTIONS CONTAINER */}
+      <div className="space-y-6 sm:space-y-8">
+        {/* SECURITY & VERIFICATION */}
         <SettingsSection
-          
-          icon={<ShieldCheck size={17} strokeWidth={1.7} />}
-          title="Security"
-          description="Protect access to your medical information."
+          icon={<ShieldCheck size={18} />}
+          title="Security & Verification"
+          description="Protect access credentials and manage authorization."
         >
           <SettingsRow
-            icon={<Mail size={16} strokeWidth={1.7} />}
-            title="Email verification"
+            icon={<Mail size={16} />}
+            title="Email Verification"
             description={
               emailVerified
-                ? "Your email address is verified."
-                : "Verify your email to help protect your account."
+                ? "Your email address has been successfully verified."
+                : "Verify your email to ensure uninterrupted passport access."
             }
             right={
               emailVerified ? (
@@ -160,52 +151,37 @@ export default function SettingsClient({
                   Verified
                 </StatusBadge>
               ) : (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   type="button"
                   onClick={handleVerification}
                   disabled={resendingVerification}
-                  data-cuelume-hover="tick"
-                  data-cuelume-press
-                  data-cuelume-release
-                  className="
-                    inline-flex h-8 items-center justify-center gap-1.5
-                    rounded-lg
-                    border border-[#D7A73A]/20
-                    bg-[#D7A73A]/[0.07]
-                    px-3
-                    font-mono text-[8px] font-medium uppercase
-                    tracking-[0.08em]
-                    text-[#D7A73A]
-                    transition-all
-                    hover:border-[#D7A73A]/30
-                    hover:bg-[#D7A73A]/[0.11]
-                    disabled:cursor-wait
-                    disabled:opacity-50
-                  "
+                  className="inline-flex h-8 items-center justify-center gap-1.5 rounded-xl border border-[#121312]/15 bg-[#F8F6F0] px-3 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#121312] shadow-2xs transition hover:border-[#121312] hover:bg-[#121312] hover:text-[#F8F6F0] disabled:cursor-wait disabled:opacity-50"
                 >
                   {resendingVerification ? (
                     <Loader2 size={11} className="animate-spin" />
                   ) : (
                     "Verify"
                   )}
-                </button>
+                </motion.button>
               )
             }
           />
 
           <SettingsRow
-            icon={<Lock size={16} strokeWidth={1.7} />}
-            title="Password"
+            icon={<Lock size={16} />}
+            title="Password Reset"
             description={
               sendingPasswordReset
-                ? "Sending a secure password reset link..."
-                : "Send a secure link to change your password."
+                ? "Dispatching password reset instructions..."
+                : "Send a secure recovery link to update your account password."
             }
             action
             onClick={handlePasswordReset}
             right={
               sendingPasswordReset ? (
-                <Loader2 size={15} className="animate-spin text-[#62C58C]" />
+                <Loader2 size={15} className="animate-spin text-[#18392B]" />
               ) : (
                 <ChevronRight size={15} />
               )
@@ -213,186 +189,107 @@ export default function SettingsClient({
           />
         </SettingsSection>
 
+        {/* PROFILE & SESSION */}
         <SettingsSection
-          
-          icon={<Bell size={17} strokeWidth={1.7} />}
-          title="Notifications"
-          description="Control how MediPass keeps you informed."
+          icon={<UserRound size={18} />}
+          title="Profile & Session"
+          description="Manage personal details and active passport sessions."
         >
           <SettingsRow
-            icon={<Bell size={16} strokeWidth={1.7} />}
-            title="Account notifications"
-            description={
-              notifications
-                ? "Important updates about your MediPass account are enabled."
-                : "Account notifications are currently turned off."
-            }
-            right={
-              <button
-                type="button"
-                disabled={savingNotifications}
-                aria-label="Toggle account notifications"
-                aria-pressed={notifications}
-                onClick={handleNotificationChange}
-                data-cuelume-toggle
-                className={`
-                  relative
-                  h-7
-                  w-12
-                  shrink-0
-                  rounded-full
-                  border
-                  p-0.5
-                  transition-all
-                  duration-200
-                  ${
-                    notifications
-                      ? "border-[#62C58C]/30 bg-[#246B45] shadow-[0_0_16px_rgba(36,107,69,0.18)]"
-                      : "border-white/[0.09] bg-white/[0.06]"
-                  }
-                  disabled:cursor-wait
-                  disabled:opacity-60
-                `}
-              >
-                <span
-                  className={`
-                    absolute
-                    top-1/2
-                    h-5
-                    w-5
-                    -translate-y-1/2
-                    rounded-full
-                    bg-[#F4F7F4]
-                    shadow-[0_2px_6px_rgba(0,0,0,0.3)]
-                    transition-all
-                    duration-200
-                    ${notifications ? "left-[25px]" : "left-1"}
-                  `}
-                />
-              </button>
-            }
-          />
-        </SettingsSection>
-
-        <SettingsSection
-         
-          icon={<UserRound size={17} strokeWidth={1.7} />}
-          title="Account"
-          description="Manage your personal MediPass information."
-        >
-          <SettingsRow
-            icon={<UserRound size={16} strokeWidth={1.7} />}
-            title="Profile"
-            description="Update your name, contact details and emergency information."
+            icon={<UserRound size={16} />}
+            title="Profile Settings"
+            description="Edit full name, emergency contact details, and vital parameters."
             href="/dashboard/profile"
             right={<ChevronRight size={15} />}
           />
 
           <SettingsRow
-            icon={<LogOut size={16} strokeWidth={1.7} />}
-            title="Sign out"
-            description="Sign out of your current MediPass session."
+            icon={<LogOut size={16} />}
+            title="Sign Out"
+            description="Terminate current session and sign out of this device."
             logout
             right={<ChevronRight size={15} />}
           />
         </SettingsSection>
       </div>
 
-      {/* =========================================================
-          DANGER
-      ========================================================== */}
-
-      <section
-        className="
-          relative
-          mt-8
-          overflow-hidden
-          rounded-2xl
-          border border-red-400/[0.10]
-          bg-red-950/[0.08]
-        "
+      {/* DANGER ZONE (Enhanced Double Border) */}
+      <motion.section
+        variants={itemVariants}
+        className="relative overflow-hidden rounded-3xl border border-red-500/20 bg-gradient-to-b from-red-50/60 to-red-50/20 p-5 ring-1 ring-red-500/10 shadow-[0_4px_20px_-4px_rgba(239,68,68,0.05),0_0_0_1px_rgba(239,68,68,0.1)_inset] backdrop-blur-xs sm:p-8"
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-red-500/[0.025] to-transparent" />
-
-        <div className="relative p-5 sm:p-6">
-          <div className="flex items-start gap-4">
-            <div
-              className="
-                flex h-10 w-10
-                shrink-0
-                items-center justify-center
-                rounded-xl
-                border border-red-400/10
-                bg-red-500/[0.05]
-                text-red-300/60
-              "
-            >
-              <Trash2 size={16} strokeWidth={1.6} />
-            </div>
-
-            <div className="min-w-0">
-              <p className="font-mono text-[8px] font-medium uppercase tracking-[0.18em] text-red-300/45">
-                Danger zone
-              </p>
-
-              <h2 className="mt-2 text-sm font-medium text-white/70">
-                Delete account
-              </h2>
-
-              <p className="mt-1 max-w-xl text-[10px] leading-5 text-white/25">
-                Permanently remove your MediPass account and associated medical
-                information.
-              </p>
-            </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-red-200/80 bg-red-100/80 text-red-700 shadow-2xs">
+            <Trash2 size={18} />
           </div>
 
-          <button
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[9px] font-semibold uppercase tracking-widest text-red-600">
+                Danger Zone
+              </span>
+              <span className="h-1 w-1 rounded-full bg-red-400" />
+              <span className="font-mono text-[8px] uppercase tracking-wider text-red-500/80 sm:text-[9px]">
+                Irreversible
+              </span>
+            </div>
+
+            <h2 className="mt-1 font-serif text-lg font-normal text-[#121312] sm:text-xl">
+              Delete Account
+            </h2>
+
+            <p className="mt-1 font-mono text-xs text-[#121312]/60 leading-relaxed">
+              Permanently purge your MediPass medical vault, timeline logs, and
+              sharing keys.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3 border-t border-red-200/60 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:pt-5">
+          <motion.button
+            whileHover={{ scale: 1 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             disabled
-            className="
-              mt-5
-              h-9
-              rounded-lg
-              border border-red-400/10
-              bg-red-500/[0.025]
-              px-3
-              font-mono text-[8px]
-              font-medium uppercase
-              tracking-[0.1em]
-              text-red-300/30
-            "
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-red-200/80 bg-white/80 px-4 font-mono text-[9px] font-semibold uppercase tracking-wider text-red-400 opacity-60 shadow-2xs cursor-not-allowed sm:w-auto"
           >
-            Delete account
-          </button>
+            <ShieldAlert size={12} />
+            Delete Account
+          </motion.button>
 
-          <p className="mt-3 font-mono text-[7px] uppercase tracking-[0.08em] text-white/10">
-            Secure deletion workflow required
-          </p>
-        </div>
-      </section>
-
-      {/* =========================================================
-          ACCOUNT FOOTER
-      ========================================================== */}
-
-      <div className="mt-8 flex items-center justify-between border-t border-white/[0.05] pt-4">
-        <div>
-          <p className="font-mono text-[7px] uppercase tracking-[0.15em] text-white/10">
-            Signed in as
-          </p>
-
-          <p className="mt-1 text-[10px] text-white/25">{email}</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#62C58C]/60" />
-
-          <span className="font-mono text-[7px] uppercase tracking-[0.12em] text-white/10">
-            Secure
+          <span className="font-mono text-[8px] uppercase tracking-widest text-[#121312]/40 sm:text-[9px]">
+            Protected Workflow
           </span>
         </div>
-      </div>
-    </div>
+      </motion.section>
+
+      {/* FOOTER */}
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col gap-3 border-t border-[#121312]/10 pt-5 sm:flex-row sm:items-center sm:justify-between sm:pt-6"
+      >
+        <div>
+          <p className="font-mono text-[8px] uppercase tracking-widest text-[#121312]/40 sm:text-[9px]">
+            Active Account
+          </p>
+
+          <p className="font-mono text-xs font-medium text-[#121312]/70 sm:text-sm">
+            {email}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 rounded-full border border-[#18392B]/15 bg-[#18392B]/5 px-3 py-1.5 self-start sm:self-auto">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18392B]" />
+          </span>
+
+          <span className="font-mono text-[8px] uppercase tracking-wider text-[#18392B] sm:text-[9px]">
+            Zero-Knowledge Encrypted
+          </span>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -412,48 +309,30 @@ function SettingsSection({
   children: React.ReactNode;
 }) {
   return (
-    <section
-      className="
-        overflow-hidden
-        rounded-[22px]
-        border border-white/[0.07]
-        bg-[#111712]/80
-        shadow-[0_14px_40px_rgba(0,0,0,0.16)]
-        backdrop-blur-xl
-      "
+    <motion.section
+      variants={itemVariants}
+      className="relative overflow-hidden rounded-3xl border border-[#121312]/10 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.03),0_0_0_1px_rgba(18,19,18,0.02)_inset] backdrop-blur-md"
     >
-      {/* Section heading */}
-      <div className="flex items-center gap-4 border-b border-white/[0.06] px-5 py-4 sm:px-6">
-        {/* <span className="font-mono text-[8px] tracking-[0.12em] text-white/15">
-          {number}
-        </span> */}
-
-        <div
-          className="
-            flex h-8 w-8
-            shrink-0
-            items-center justify-center
-            rounded-[10px]
-            border border-[#62C58C]/15
-            bg-[#1F7A4F]/[0.08]
-            text-[#62C58C]
-          "
-        >
+      {/* Heading */}
+      <div className="flex items-center gap-3.5 border-b border-[#121312]/10 bg-[#F8F6F0]/30 px-5 py-4 sm:px-8 sm:py-5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[#18392B]/10 bg-[#F8F6F0] text-[#18392B] shadow-2xs">
           {icon}
         </div>
 
-        <div className="min-w-0">
-          <h2 className="text-xs font-semibold text-white/75">{title}</h2>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-serif text-base font-normal text-[#121312] sm:text-lg">
+            {title}
+          </h2>
 
-          <p className="mt-0.5 truncate text-[9px] text-white/22">
+          <p className="truncate font-mono text-[8px] uppercase tracking-wider text-[#121312]/40 sm:text-[9px]">
             {description}
           </p>
         </div>
       </div>
 
       {/* Rows */}
-      <div>{children}</div>
-    </section>
+      <div className="divide-y divide-[#121312]/5">{children}</div>
+    </motion.section>
   );
 }
 
@@ -481,57 +360,26 @@ function SettingsRow({
   onClick?: () => void;
 }) {
   const content = (
-    <div
-      className="
-        group
-        flex
-        min-h-[78px]
-        w-full
-        items-center
-        gap-3.5
-        px-5
-        py-4
-        transition-all
-        duration-200
-        hover:bg-white/[0.025]
-        sm:px-6
-      "
-    >
+    <div className="group relative flex min-h-[72px] w-full items-center gap-3.5 px-5 py-4 transition-all duration-200 hover:bg-[#F8F6F0]/50 sm:gap-4 sm:px-8">
       {/* Icon */}
-      <div
-        className="
-          flex h-9 w-9
-          shrink-0
-          items-center justify-center
-          rounded-[10px]
-          border border-white/[0.06]
-          bg-white/[0.02]
-          text-white/25
-          shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]
-          transition-all
-          duration-200
-          group-hover:border-[#62C58C]/15
-          group-hover:bg-[#1F7A4F]/[0.06]
-          group-hover:text-[#62C58C]
-        "
-      >
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#121312]/5 bg-[#F8F6F0] text-[#121312]/50 shadow-2xs transition-all duration-200 group-hover:scale-105 group-hover:border-[#18392B]/20 group-hover:bg-[#18392B] group-hover:text-white">
         {icon}
       </div>
 
-      {/* Copy */}
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-medium text-white/65 transition group-hover:text-white/80">
+      {/* Title & Description */}
+      <div className="min-w-0 flex-1 pr-1">
+        <p className="text-xs font-semibold text-[#121312] transition-colors group-hover:text-[#18392B]">
           {title}
         </p>
 
-        <p className="mt-1 max-w-2xl text-[9px] leading-4 text-white/22">
+        <p className="mt-0.5 max-w-2xl text-xs leading-relaxed text-[#121312]/60">
           {description}
         </p>
       </div>
 
-      {/* Action */}
+      {/* Action Element */}
       {right && (
-        <div className="flex shrink-0 items-center gap-2 text-white/20 transition group-hover:text-white/35">
+        <div className="flex shrink-0 items-center gap-2 text-[#121312]/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#121312]">
           {right}
         </div>
       )}
@@ -542,14 +390,7 @@ function SettingsRow({
     return (
       <Link
         href={href}
-        data-cuelume-hover="tick"
-        data-cuelume-press
-        data-cuelume-release
-        className="
-          block
-          border-b border-white/[0.05]
-          last:border-b-0
-        "
+        className="block focus-visible:outline-none focus-visible:bg-[#F8F6F0]"
       >
         {content}
       </Link>
@@ -558,14 +399,11 @@ function SettingsRow({
 
   if (logout) {
     return (
-      <form
-        action="/auth/logout"
-        method="post"
-        data-cuelume-press
-        data-cuelume-release
-        className="border-b border-white/[0.05] last:border-b-0"
-      >
-        <button type="submit" className="block w-full text-left">
+      <form action="/auth/logout" method="post">
+        <button
+          type="submit"
+          className="block w-full text-left focus-visible:outline-none focus-visible:bg-[#F8F6F0]"
+        >
           {content}
         </button>
       </form>
@@ -577,28 +415,14 @@ function SettingsRow({
       <button
         type="button"
         onClick={onClick}
-        data-cuelume-hover="tick"
-        data-cuelume-press
-        data-cuelume-release
-        className="
-          block
-          w-full
-          border-b
-          border-white/[0.05]
-          text-left
-          last:border-b-0
-        "
+        className="block w-full text-left focus-visible:outline-none focus-visible:bg-[#F8F6F0]"
       >
         {content}
       </button>
     );
   }
 
-  return (
-    <div className="border-b border-white/[0.05] last:border-b-0">
-      {content}
-    </div>
-  );
+  return <div>{content}</div>;
 }
 
 /* ===============================================================
@@ -607,29 +431,12 @@ function SettingsRow({
 
 function StatusBadge({
   children,
-  type,
 }: {
   children: React.ReactNode;
   type: "success";
 }) {
   return (
-    <span
-      className="
-        inline-flex
-        h-7
-        items-center
-        gap-1.5
-        rounded-lg
-        border border-[#62C58C]/15
-        bg-[#62C58C]/[0.05]
-        px-2.5
-        font-mono
-        text-[8px]
-        uppercase
-        tracking-[0.08em]
-        text-[#62C58C]
-      "
-    >
+    <span className="inline-flex h-7 items-center gap-1.5 rounded-xl border border-[#18392B]/20 bg-[#18392B]/10 px-2.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#18392B] shadow-2xs">
       {children}
     </span>
   );

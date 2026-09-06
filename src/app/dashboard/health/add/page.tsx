@@ -1,8 +1,10 @@
+// src/app/dashboard/health/add/page.tsx
+
 import Link from "next/link";
 import { addHealthItem } from "../actions";
 
 const input =
-  "mt-2 h-11 w-full min-w-0 rounded-xl border border-white/[0.07] bg-[#0C110E] px-3.5 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-[#62C58C]/30 focus:ring-2 focus:ring-[#62C58C]/10";
+  "mt-2 h-11 w-full min-w-0 rounded-xl border border-[#121312]/15 bg-[#F8F6F0] px-3.5 font-mono text-xs text-[#121312] outline-none transition placeholder:text-[#121312]/30 focus:border-[#18392B] focus:bg-white focus:ring-1 focus:ring-[#18392B]";
 
 export default function AddHealthPage() {
   return (
@@ -11,38 +13,42 @@ export default function AddHealthPage() {
       <div className="mb-6 sm:mb-8">
         <Link
           href="/dashboard/health"
-          className="inline-flex items-center text-[10px] font-semibold uppercase tracking-[0.14em] text-[#62C58C] transition hover:text-[#8BE0AC]"
+          className="inline-flex items-center font-mono text-[9px] font-semibold uppercase tracking-wider text-[#18392B] transition hover:underline"
         >
-          ← Back to health
+          ← Back to Health Records
         </Link>
 
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Add health information
+        <h1 className="mt-3 font-serif text-3xl font-normal text-[#121312] sm:text-4xl">
+          Add Health Information
         </h1>
 
-        <p className="mt-1 max-w-xl text-xs leading-5 text-white/30 sm:text-sm">
-          Add one record at a time. You can update your information later.
+        <p className="mt-1 max-w-xl font-mono text-xs text-[#121312]/60">
+          Record entry management. Update or revise individual logs at any time.
         </p>
       </div>
 
-      {/* Forms */}
-      <div className="grid w-full grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+      {/* Forms Grid */}
+      <div className="grid w-full grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
         <FormCard
-          title="Allergy"
+          title="Allergy Record"
           type="allergy"
           fields={
             <>
               <Field
                 name="name"
-                label="Allergen"
+                label="Allergen Name"
                 placeholder="e.g. Penicillin"
               />
 
-              <Field name="reaction" label="Reaction" placeholder="e.g. Rash" />
+              <Field
+                name="reaction"
+                label="Observed Reaction"
+                placeholder="e.g. Anaphylaxis, Rash"
+              />
 
               <Field
                 name="severity"
-                label="Severity"
+                label="Severity Rating"
                 placeholder="Mild / Moderate / Severe"
               />
             </>
@@ -50,40 +56,48 @@ export default function AddHealthPage() {
         />
 
         <FormCard
-          title="Medication"
+          title="Medication Record"
           type="medication"
           fields={
             <>
               <Field
                 name="name"
-                label="Medicine"
+                label="Medication Name"
                 placeholder="e.g. Metformin"
               />
 
-              <Field name="dosage" label="Dosage" placeholder="e.g. 500 mg" />
+              <Field
+                name="dosage"
+                label="Dosage Amount"
+                placeholder="e.g. 500 mg"
+              />
 
               <Field
                 name="frequency"
-                label="Frequency"
-                placeholder="e.g. Twice daily"
+                label="Administration Frequency"
+                placeholder="e.g. Twice daily with meals"
               />
             </>
           }
         />
 
         <FormCard
-          title="Condition"
+          title="Condition Record"
           type="condition"
           fields={
             <>
-              <Field name="name" label="Condition" placeholder="e.g. Asthma" />
+              <Field
+                name="name"
+                label="Condition Name"
+                placeholder="e.g. Asthma"
+              />
 
-              <Field name="diagnosed_date" label="Diagnosed date" type="date" />
+              <Field name="diagnosed_date" label="Diagnosis Date" type="date" />
 
               <Field
                 name="notes"
-                label="Notes"
-                placeholder="Optional notes"
+                label="Clinical Notes"
+                placeholder="Optional observation notes"
                 required={false}
               />
             </>
@@ -91,21 +105,21 @@ export default function AddHealthPage() {
         />
 
         <FormCard
-          title="Vaccination"
+          title="Vaccination Record"
           type="vaccination"
           fields={
             <>
               <Field
                 name="name"
-                label="Vaccine"
+                label="Vaccine Title"
                 placeholder="e.g. Hepatitis B"
               />
 
-              <Field name="date" label="Date" type="date" />
+              <Field name="date" label="Administration Date" type="date" />
 
               <Field
                 name="next_due_date"
-                label="Next due date"
+                label="Next Scheduled Dose"
                 type="date"
                 required={false}
               />
@@ -129,23 +143,25 @@ function FormCard({
   return (
     <form
       action={addHealthItem}
-      className="w-full min-w-0 rounded-[22px] border border-white/[0.07] bg-[#111712] p-4 sm:rounded-[26px] sm:p-6"
+      className="w-full min-w-0 rounded-3xl border border-[#121312]/10 bg-white p-6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] sm:p-8"
     >
       <input type="hidden" name="type" value={type} />
 
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
+      <div className="flex items-center justify-between gap-4 border-b border-[#121312]/10 pb-4">
+        <h2 className="font-serif text-xl font-normal text-[#121312]">
+          {title}
+        </h2>
 
-        <div className="h-2 w-2 shrink-0 rounded-full bg-[#62C58C]/70 shadow-[0_0_12px_rgba(98,197,140,0.25)]" />
+        <span className="h-2 w-2 shrink-0 rounded-full bg-[#18392B]" />
       </div>
 
-      <div className="mt-5 space-y-4 sm:mt-6">{fields}</div>
+      <div className="mt-6 space-y-4">{fields}</div>
 
       <button
         type="submit"
-        className="mt-5 h-11 w-full rounded-xl bg-[#246B45] px-4 text-xs font-semibold text-white transition hover:bg-[#2C7D53] active:scale-[0.99] sm:mt-6"
+        className="mt-6 h-11 w-full rounded-xl bg-[#121312] px-4 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#F8F6F0] transition hover:bg-[#18392B]"
       >
-        Save {title.toLowerCase()}
+        Save {title}
       </button>
     </form>
   );
@@ -165,7 +181,7 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <label className="block min-w-0 text-[10px] font-medium uppercase tracking-[0.1em] text-white/30">
+    <label className="block min-w-0 font-mono text-[9px] uppercase tracking-wider text-[#121312]/60">
       {label}
 
       <input

@@ -1,19 +1,40 @@
 "use client";
 
 import {
+  AnimatePresence,
+  motion,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import {
   ArrowLeft,
   ArrowRight,
+  CheckCircle2,
   HeartPulse,
   Loader2,
   Mail,
+  RotateCcw,
   ShieldCheck,
 } from "lucide-react";
 
-import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { toast } from "sonner";
-
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/lib/toast"; // Sound-enabled Cuelume audio toasts
+import Link from "next/link";
+import { FormEvent, useRef, useState } from "react";
+
+// Fluid Spring Configurations
+const springPhysics = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 28,
+  mass: 0.8,
+};
+
+const microSpring = {
+  type: "spring" as const,
+  stiffness: 500,
+  damping: 25,
+};
 
 export default function ForgotPasswordPage() {
   const supabase = createClient();
@@ -21,6 +42,27 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+
+  // 3D Tilt Card Effects
+  const cardRef = useRef<HTMLDivElement>(null);
+  const x = useSpring(0, { stiffness: 200, damping: 20 });
+  const y = useSpring(0, { stiffness: 200, damping: 20 });
+  const rotateX = useTransform(y, [-0.5, 0.5], [6, -6]);
+  const rotateY = useTransform(x, [-0.5, 0.5], [-6, 6]);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+    const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  }
+
+  function handleMouseLeave() {
+    x.set(0);
+    y.set(0);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,9 +72,7 @@ export default function ForgotPasswordPage() {
     const cleanEmail = email.trim();
 
     if (!cleanEmail) {
-      toast.error("Email required", {
-        description: "Enter the email address associated with your account.",
-      });
+      toast.warning("Email required to proceed");
       return;
     }
 
@@ -46,157 +86,233 @@ export default function ForgotPasswordPage() {
       });
 
       if (error) {
-        toast.error("Unable to send reset email", {
-          description: error.message,
-        });
+        toast.error("Unable to send reset email");
         return;
       }
 
       setSent(true);
-
-      toast.success("Reset email sent", {
-        description: "Check your inbox for the password reset link.",
-      });
+      toast.success("Reset link sent to inbox");
     } catch (error) {
       console.error("FORGOT PASSWORD ERROR:", error);
-
-      toast.error("Something went wrong", {
-        description: "Please try again in a moment.",
-      });
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="min-h-screen bg-[#080D0A] px-4 py-6 text-white sm:px-6">
-      <div className="mx-auto flex min-h-[calc(100vh-48px)] max-w-[520px] items-center justify-center">
-        <div className="w-full">
-          {/* Back */}
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#080D0A] px-4 py-6 text-white selection:bg-[#1F7A4F] selection:text-white sm:px-6">
+      {/* Dynamic Background Glow Canvas */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <motion.div
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.15, 0.25, 0.15],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 8,
+            ease: "easeInOut",
+          }}
+          className="absolute left-1/2 top-1/2 h-[550px] w-[550px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1F7A4F]/[0.15] blur-[140px]"
+        />
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
+          }}
+        />
+      </div>
+
+      <div className="relative z-10 w-full max-w-[500px]">
+        {/* Back Link */}
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={springPhysics}
+        >
           <Link
             href="/auth"
-            className="mb-8 inline-flex h-10 items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 text-xs text-white/45 transition hover:bg-white/[0.05] hover:text-white"
+            className="group mb-6 inline-flex h-10 items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 text-xs font-mono uppercase tracking-wider text-white/50 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
           >
-            <ArrowLeft size={15} />
-            Back to sign in
+            <ArrowLeft
+              size={14}
+              className="transition-transform group-hover:-translate-x-1"
+            />
+            <span>Back to sign in</span>
           </Link>
+        </motion.div>
 
-          {/* Card */}
-          <section className="rounded-[28px] border border-white/[0.08] bg-[#111712] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.4)] sm:p-9">
-            {/* Logo */}
-            <div className="mb-8 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1F7A4F] text-white shadow-[0_8px_25px_rgba(31,122,79,0.25)]">
-                <HeartPulse size={21} />
-              </div>
+        {/* 3D Tilt Card */}
+        <motion.section
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            rotateX,
+            rotateY,
+            transformStyle: "preserve-3d",
+          }}
+          initial={{ opacity: 0, y: 25, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={springPhysics}
+          className="relative overflow-hidden rounded-[32px] border border-white/[0.1] bg-[#111712]/90 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-9"
+        >
+          {/* Logo Header */}
+          <div className="mb-8 flex items-center gap-3.5">
+            <motion.div
+              whileHover={{ rotate: 12, scale: 1.05 }}
+              transition={microSpring}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1F7A4F] text-white shadow-[0_8px_25px_rgba(31,122,79,0.3)]"
+            >
+              <HeartPulse size={21} />
+            </motion.div>
 
-              <div>
-                <p className="font-semibold tracking-tight">MediPass</p>
-
-                <p className="text-[10px] uppercase tracking-[0.14em] text-white/25">
-                  Secure account recovery
-                </p>
-              </div>
+            <div>
+              <p className="font-serif text-lg font-normal tracking-tight text-white">
+                MediPass
+              </p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-white/30">
+                Secure Account Recovery
+              </p>
             </div>
+          </div>
 
+          <AnimatePresence mode="wait">
             {!sent ? (
-              <>
+              /* FORM STAGE */
+              <motion.div
+                key="form-stage"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={springPhysics}
+              >
                 <div className="mb-8">
-                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#1F7A4F]/15 text-[#62C58C]">
-                    <Mail size={20} />
-                  </div>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={microSpring}
+                    className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1F7A4F]/15 text-[#62C58C]"
+                  >
+                    <Mail size={22} />
+                  </motion.div>
 
-                  <h1 className="text-3xl font-semibold tracking-[-0.04em]">
+                  <h1 className="font-serif text-2xl font-normal tracking-tight text-white sm:text-3xl">
                     Forgot your password?
                   </h1>
 
-                  <p className="mt-2 text-sm leading-6 text-white/35">
-                    Enter your email and we&apos;ll send you a secure link to create
-                    a new password.
+                  <p className="mt-2 text-xs leading-5 text-white/40 sm:text-sm">
+                    Enter your registered email address to receive an encrypted
+                    reset link.
                   </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-white/55">
-                      Email
+                    <label className="font-mono text-[10px] font-semibold uppercase tracking-wider text-white/50">
+                      Email Address
                     </label>
 
                     <div className="relative">
                       <Mail
                         size={17}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 transition-colors group-focus-within:text-[#62C58C]"
                       />
 
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email"
+                        placeholder="name@example.com"
                         autoComplete="email"
                         required
                         disabled={loading}
-                        className="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.035] pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-white/20 focus:border-[#55B981]/40 focus:bg-white/[0.05] disabled:opacity-50"
+                        className="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.035] pl-11 pr-4 font-sans text-sm text-white outline-none transition duration-200 placeholder:text-white/20 focus:border-[#62C58C]/50 focus:bg-white/[0.06] disabled:opacity-50"
                       />
                     </div>
                   </div>
 
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={loading}
-                    className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#246B45] text-sm font-semibold text-white shadow-[0_6px_18px_rgba(36,107,69,0.18)] transition hover:-translate-y-0.5 hover:bg-[#1F603D] disabled:pointer-events-none disabled:opacity-50"
+                    className="group relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#246B45] font-mono text-xs font-semibold uppercase tracking-wider text-white shadow-[0_6px_20px_rgba(36,107,69,0.25)] transition hover:bg-[#1F603D] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading ? (
                       <>
-                        <Loader2 size={17} className="animate-spin" />
-                        Sending reset link...
+                        <Loader2
+                          size={16}
+                          className="animate-spin text-white"
+                        />
+                        <span>Sending reset link…</span>
                       </>
                     ) : (
                       <>
-                        Send reset link
+                        <span>Send Reset Link</span>
                         <ArrowRight
-                          size={16}
-                          className="transition-transform group-hover:translate-x-0.5"
+                          size={15}
+                          className="transition-transform group-hover:translate-x-1"
                         />
                       </>
                     )}
-                  </button>
+                  </motion.button>
                 </form>
-              </>
+              </motion.div>
             ) : (
-              <div className="py-6 text-center">
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1F7A4F]/15 text-[#62C58C]">
-                  <Mail size={23} />
-                </div>
+              /* SUCCESS CONFIRMATION STAGE */
+              <motion.div
+                key="success-stage"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={springPhysics}
+                className="py-4 text-center"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={microSpring}
+                  className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1F7A4F]/20 text-[#62C58C]"
+                >
+                  <CheckCircle2 size={26} />
+                </motion.div>
 
-                <h1 className="text-2xl font-semibold">Check your inbox</h1>
+                <h1 className="font-serif text-2xl font-normal tracking-tight text-white">
+                  Check your inbox
+                </h1>
 
-                <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-white/35">
-                  If an account exists for{" "}
-                  <span className="text-white/65">{email}</span>, we&apos;ve sent a
-                  password reset link.
+                <p className="mx-auto mt-3 max-w-sm text-xs leading-6 text-white/40 sm:text-sm">
+                  If an active account exists for{" "}
+                  <span className="font-semibold text-white/80">{email}</span>,
+                  a secure recovery authorization email has been dispatched.
                 </p>
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   type="button"
                   onClick={() => {
                     setSent(false);
-                    toast.info("Ready to resend", {
-                      description: "You can request another reset email.",
-                    });
+                    toast.info("Form reset for new request");
                   }}
-                  className="mt-7 text-xs font-semibold text-[#62C58C] transition hover:text-white"
+                  className="mt-7 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-[#62C58C] transition hover:border-[#62C58C]/40 hover:bg-white/[0.08]"
                 >
-                  Send another email
-                </button>
-              </div>
+                  <RotateCcw size={13} />
+                  <span>Send Another Email</span>
+                </motion.button>
+              </motion.div>
             )}
+          </AnimatePresence>
 
-            <div className="mt-8 flex items-center justify-center gap-2 text-[10px] text-white/20">
-              <ShieldCheck size={13} />
-              Secure password recovery
-            </div>
-          </section>
-        </div>
+          {/* Card Footer Security Tag */}
+          <div className="mt-8 flex items-center justify-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-white/20">
+            <ShieldCheck size={13} className="text-[#62C58C]" />
+            <span>End-to-End Encrypted Recovery</span>
+          </div>
+        </motion.section>
       </div>
     </main>
   );

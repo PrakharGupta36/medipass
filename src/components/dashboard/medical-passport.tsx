@@ -1,10 +1,17 @@
+// src/components/dashboard/medical-passport.tsx
+
+import { ArrowUpRight, Fingerprint, QrCode, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Fingerprint,
-  QrCode,
-  ShieldCheck,
-} from "lucide-react";
+
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/);
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export default function MedicalPassport({
   name,
@@ -13,294 +20,107 @@ export default function MedicalPassport({
   name: string;
   email: string;
 }) {
+  const initials = getInitials(name);
+
   return (
-    <section
-      className="
-        group
-        relative
-        overflow-hidden
-        rounded-[28px]
-        border border-[#62C58C]/15
-        bg-[#111A14]
-        shadow-[0_24px_70px_rgba(0,0,0,0.28)]
-      "
-    >
-      {/* =========================================================
-          GLASS / DOCUMENT SURFACE
-      ========================================================== */}
+    <section className="group relative overflow-hidden rounded-2xl border border-[#121312]/10 bg-gradient-to-br from-white to-[#FBFAF6] shadow-[0_4px_28px_-6px_rgba(18,19,18,0.06)] transition-all duration-300 hover:border-[#121312]/20 hover:shadow-[0_10px_40px_-8px_rgba(18,19,18,0.1)] sm:rounded-3xl">
+      <div className="relative p-4 sm:p-6 lg:p-7">
+        {/* Identity */}
+        <div className="flex items-center gap-3 sm:gap-5">
+          {/* Monogram seal */}
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#18392B] font-serif text-base text-[#F8F6F0] shadow-inner sm:h-16 sm:w-16 sm:rounded-2xl sm:text-xl">
+            {initials}
 
-      <div
-        className="
-          pointer-events-none
-          absolute inset-[1px]
-          rounded-[27px]
-          border border-white/[0.035]
-        "
-      />
+            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-[#18392B] text-white sm:h-5 sm:w-5">
+              <ShieldCheck size={9} strokeWidth={2.5} className="sm:hidden" />
+              <ShieldCheck
+                size={11}
+                strokeWidth={2.5}
+                className="hidden sm:block"
+              />
+            </span>
+          </div>
 
-      {/* Top glass reflection */}
-      <div
-        className="
-          pointer-events-none
-          absolute
-          inset-x-10
-          top-0
-          h-16
-          bg-white/[0.025]
-          blur-2xl
-        "
-      />
+          {/* User information */}
+          <div className="min-w-0 flex-1">
+            <span className="block truncate font-mono text-[8px] uppercase tracking-[0.16em] text-[#18392B] sm:text-[9px] sm:tracking-[0.2em]">
+              Verified Digital Credential
+            </span>
 
-      {/* Very subtle green atmosphere */}
-      <div
-        className="
-          pointer-events-none
-          absolute
-          -right-32
-          -top-32
-          h-80
-          w-80
-          rounded-full
-          bg-[#2B8A5A]/[0.10]
-          blur-[100px]
-        "
-      />
-
-      {/* Decorative passport ring */}
-      <div
-        className="
-          pointer-events-none
-          absolute
-          -bottom-28
-          -right-20
-          h-64
-          w-64
-          rounded-full
-          border
-          border-white/[0.035]
-        "
-      />
-
-      <div className="relative p-6 sm:p-7 lg:p-8">
-        {/* =======================================================
-            PASSPORT HEADER
-        ======================================================== */}
-
-        <div className="flex items-start justify-between gap-5">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span
-                className="
-                  flex h-6 w-6
-                  items-center justify-center
-                  rounded-[7px]
-                  border border-[#62C58C]/20
-                  bg-[#1F7A4F]/10
-                  text-[#62C58C]
-                "
-              >
-                <ShieldCheck size={13} strokeWidth={1.8} />
-              </span>
-
-              <p className="font-mono text-[8px] font-medium uppercase tracking-[0.22em] text-[#62C58C]/75">
-                Medical passport
-              </p>
-            </div>
-
-            <h2 className="mt-4 truncate text-[27px] font-semibold tracking-[-0.045em] text-white sm:text-[30px]">
+            <h2 className="mt-1 truncate font-serif text-xl font-normal tracking-tight text-[#121312] sm:mt-1.5 sm:text-2xl lg:text-3xl">
               {name}
             </h2>
 
-            <p className="mt-1 truncate text-[11px] text-white/25">
+            <p className="mt-0.5 truncate font-mono text-[10px] text-[#121312]/40 sm:text-xs">
               {email}
             </p>
           </div>
 
-          {/* QR / access button */}
+          {/* QR action */}
           <Link
             href="/dashboard/share"
             aria-label="Share medical passport"
-            data-cuelume-hover="tick"
-            data-cuelume-press
-            data-cuelume-release
-            className="
-              group/qr
-              relative
-              flex h-14 w-14
-              shrink-0
-              items-center justify-center
-              rounded-[16px]
-              border border-white/[0.09]
-              bg-white/[0.035]
-              text-white/55
-              shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]
-              transition-all duration-200
-              hover:border-[#62C58C]/20
-              hover:bg-[#1F7A4F]/10
-              hover:text-[#72D39A]
-              active:scale-95
-            "
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#121312]/10 bg-[#F8F6F0] text-[#121312] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#121312] hover:bg-[#121312] hover:text-[#F8F6F0] sm:h-11 sm:w-11"
           >
-            <QrCode
-              size={23}
-              strokeWidth={1.6}
-              className="transition-transform duration-200 group-hover/qr:scale-105"
-            />
-
-            <span
-              className="
-                absolute
-                right-2
-                top-2
-                h-1.5
-                w-1.5
-                rounded-full
-                bg-[#62C58C]/70
-              "
-            />
+            <QrCode size={17} strokeWidth={1.8} />
           </Link>
         </div>
 
-        {/* =======================================================
-            IDENTITY STRIP
-        ======================================================== */}
+        {/* Perforated stub divider */}
+        <div className="relative my-5 sm:my-6">
+          <div
+            className="h-px w-full"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, rgba(18,19,18,0.16) 0 4px, transparent 4px 9px)",
+            }}
+          />
 
-        <div className="mt-7 border-y border-white/[0.065] py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Fingerprint
-                size={13}
-                strokeWidth={1.5}
-                className="text-white/20"
-              />
+          <div className="absolute left-0 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F8F6F0]" />
 
-              <span className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/20">
-                Patient identity
-              </span>
-            </div>
+          <div className="absolute right-0 top-1/2 h-4 w-4 translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F8F6F0]" />
+        </div>
 
-            <span className="font-mono text-[8px] uppercase tracking-[0.14em] text-[#62C58C]/55">
-              Verified record
+        {/* Security status */}
+        <div className="flex flex-col gap-2.5 font-mono text-[8px] uppercase tracking-[0.14em] text-[#121312]/50 min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between sm:text-[9px] sm:tracking-[0.16em]">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-3.5 w-3.5 shrink-0 items-center justify-center text-[#18392B]">
+              <Fingerprint size={14} className="animate-pulse" />
             </span>
+
+            <span>Biometric Lock: Enabled</span>
           </div>
+
+          <span className="pl-5 text-[#18392B] min-[400px]:pl-0">
+            Active State
+          </span>
         </div>
 
-        {/* =======================================================
-            PASSPORT DATA
-        ======================================================== */}
+        {/* Passport fields */}
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-4 sm:gap-3">
+          <PassportField label="Status" value="Active" highlight />
 
-        <div className="grid grid-cols-2 sm:grid-cols-4">
-          <PassportField
-            label="Status"
-            value="Active"
-            green
-            bordered
-          />
+          <PassportField label="Records" value="0 Entries" />
 
-          <PassportField
-            label="Records"
-            value="0"
-            bordered
-          />
+          <PassportField label="Sharing" value="Controlled" />
 
-          <PassportField
-            label="Sharing"
-            value="Private"
-            bordered
-          />
-
-          <PassportField
-            label="Updated"
-            value="Just now"
-          />
+          <PassportField label="Updated" value="Just Now" />
         </div>
 
-        {/* =======================================================
-            SHARE ACTION
-        ======================================================== */}
-
+        {/* Share button */}
         <Link
           href="/dashboard/share"
-          data-cuelume-hover="tick"
-          data-cuelume-press
-          data-cuelume-release
-          className="
-            group/share
-            relative
-            mt-7
-            flex
-            h-12
-            w-full
-            items-center
-            justify-center
-            gap-2.5
-            overflow-hidden
-            rounded-[14px]
-            border border-[#62C58C]/20
-            bg-[#1F6B46]
-            text-[11px]
-            font-semibold
-            text-white
-            shadow-[0_10px_28px_rgba(31,107,70,0.16),inset_0_1px_0_rgba(255,255,255,0.10)]
-            transition-all duration-200
-            hover:bg-[#26764D]
-            hover:shadow-[0_12px_32px_rgba(31,107,70,0.22),inset_0_1px_0_rgba(255,255,255,0.12)]
-            active:scale-[0.985]
-          "
+          className="group/btn mt-4 flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#18392B] px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-[#F8F6F0] shadow-sm transition-all duration-200 hover:bg-[#122A20] sm:mt-6 sm:h-12 sm:px-4 sm:text-xs sm:tracking-wider"
         >
-          {/* Button glass reflection */}
-          <span
-            className="
-              pointer-events-none
-              absolute
-              inset-x-12
-              top-0
-              h-6
-              rounded-full
-              bg-white/[0.06]
-              blur-xl
-            "
-          />
+          <QrCode size={14} className="shrink-0 sm:h-[15px] sm:w-[15px]" />
 
-          <QrCode
-            size={15}
-            strokeWidth={1.8}
-            className="relative z-10"
-          />
-
-          <span className="relative z-10">
-            Share medical passport
-          </span>
+          <span className="truncate">Share Medical Passport</span>
 
           <ArrowUpRight
             size={14}
-            strokeWidth={1.8}
-            className="
-              relative z-10
-              transition-transform duration-200
-              group-hover/share:translate-x-0.5
-              group-hover/share:-translate-y-0.5
-            "
+            className="shrink-0 transition-transform duration-200 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 sm:h-[15px] sm:w-[15px]"
           />
         </Link>
-
-        {/* =======================================================
-            FOOTNOTE
-        ======================================================== */}
-
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#62C58C]/60" />
-
-            <span className="text-[9px] text-white/20">
-              Access controlled by you
-            </span>
-          </div>
-
-          <span className="font-mono text-[8px] tracking-[0.12em] text-white/10">
-            MEDIPASS
-          </span>
-        </div>
       </div>
     </section>
   );
@@ -309,37 +129,22 @@ export default function MedicalPassport({
 function PassportField({
   label,
   value,
-  green = false,
-  bordered = false,
+  highlight = false,
 }: {
   label: string;
   value: string;
-  green?: boolean;
-  bordered?: boolean;
+  highlight?: boolean;
 }) {
   return (
-    <div
-      className={`
-        relative
-        py-5
-        ${bordered ? "border-r border-white/[0.055]" : ""}
-      `}
-    >
-      <p className="font-mono text-[8px] uppercase tracking-[0.15em] text-white/20">
+    <div className="min-w-0 rounded-lg border border-[#121312]/5 bg-[#F8F6F0] p-2.5 transition-colors hover:border-[#121312]/15 sm:rounded-xl sm:p-3">
+      <p className="truncate font-mono text-[7px] uppercase tracking-[0.12em] text-[#121312]/40 sm:text-[8px] sm:tracking-[0.16em]">
         {label}
       </p>
 
       <p
-        className={`
-          mt-2
-          text-[11px]
-          font-medium
-          ${
-            green
-              ? "text-[#62C58C]"
-              : "text-white/65"
-          }
-        `}
+        className={`mt-1 truncate text-[10px] font-semibold tabular-nums sm:text-xs ${
+          highlight ? "text-[#18392B]" : "text-[#121312]"
+        }`}
       >
         {value}
       </p>

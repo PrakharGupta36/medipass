@@ -1,9 +1,12 @@
+// src/app/auth/verify-email/page.tsx
+
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
 import {
   ArrowLeft,
   ArrowRight,
+  CheckCircle2,
   HeartPulse,
   Loader2,
   Mail,
@@ -11,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function VerifyEmailContent() {
@@ -21,6 +24,20 @@ export default function VerifyEmailContent() {
   const supabase = createClient();
 
   const [loading, setLoading] = useState(false);
+
+  // Interactive mouse position & spotlight states
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ x: 50, y: 50 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = pageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    setPos({ x: xPct, y: yPct });
+  };
 
   async function resendEmail() {
     if (!email) {
@@ -65,106 +82,160 @@ export default function VerifyEmailContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#020504] text-white">
-      <div className="relative min-h-screen overflow-hidden">
-        {/* Ambient glow */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-emerald-500/[0.06] blur-[120px]" />
-        </div>
+    <main
+      ref={pageRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className="relative flex h-screen w-screen items-center justify-center overflow-hidden bg-[#F4F0EA] p-4 text-[#121312] selection:bg-[#18392B] selection:text-[#F8F6F0] lg:p-6"
+    >
+      {/* 1. Fine Film Grain Texture Overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.035] mix-blend-multiply"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        }}
+      />
 
-        <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12">
-          <div className="w-full max-w-md">
-            {/* Logo */}
-            <div className="mb-8 flex items-center justify-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/[0.08]">
-                <HeartPulse size={20} className="text-emerald-400" />
+      {/* 2. Architectural Grid Background */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(#121312 1px, transparent 1px), linear-gradient(90deg, #121312 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
+        }}
+      />
+
+      {/* 3. Dynamic Cursor Mask Grid */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 hidden transition-opacity duration-500 lg:block"
+        style={{
+          backgroundImage:
+            "linear-gradient(#18392B 1px, transparent 1px), linear-gradient(90deg, #18392B 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
+          opacity: isHovering ? 0.2 : 0,
+          WebkitMaskImage: `radial-gradient(320px circle at ${pos.x}% ${pos.y}%, black, transparent 80%)`,
+          maskImage: `radial-gradient(320px circle at ${pos.x}% ${pos.y}%, black, transparent 80%)`,
+        }}
+      />
+
+      {/* 4. Warm Dynamic Spotlight Aura */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 hidden transition-all duration-300 ease-out lg:block"
+        style={{
+          background: `radial-gradient(750px circle at ${pos.x}% ${pos.y}%, rgba(24, 57, 43, 0.07), transparent 50%)`,
+        }}
+      />
+
+      {/* Main Enclosing Frame - Strictly Bounded */}
+      <div className="relative z-10 flex h-full max-h-[720px] w-full max-w-[500px] items-center justify-center">
+        <div className="flex h-full w-full flex-col justify-between overflow-hidden rounded-[32px] border border-[#121312]/10 bg-white/80 p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] backdrop-blur-md sm:p-8">
+          {/* Header Navigation & Brand */}
+          <div className="flex items-center justify-between">
+            <Link
+              href="/auth"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#121312]/10 bg-[#F8F6F0] text-[#121312]/60 transition-all hover:border-[#121312] hover:bg-[#121312] hover:text-[#F8F6F0]"
+              aria-label="Back to sign in"
+            >
+              <ArrowLeft size={16} />
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#18392B] text-[#F8F6F0]">
+                <HeartPulse size={16} />
               </div>
-
-              <span className="text-lg font-semibold tracking-tight">
+              <span className="font-serif text-lg font-normal text-[#121312]">
                 MediPass
               </span>
             </div>
 
-            {/* Card */}
-            <div className="rounded-[28px] border border-white/[0.08] bg-white/[0.035] p-8 shadow-2xl shadow-black/40 backdrop-blur-xl">
-              <div className="mb-8 text-center">
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.08]">
-                  <Mail size={28} className="text-emerald-400" />
-                </div>
+            <div className="w-9" />
+          </div>
 
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  Check your inbox
-                </h1>
-
-                <p className="mt-3 text-sm leading-6 text-white/50">
-                  We&apos;ve sent a confirmation link to your email address.
-                </p>
-
-                {email && (
-                  <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/20 px-4 py-3">
-                    <p className="truncate text-sm font-medium text-white/80">
-                      {email}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Security note */}
-              <div className="mb-6 flex gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
-                <ShieldCheck
-                  size={18}
-                  className="mt-0.5 shrink-0 text-emerald-400"
-                />
-
-                <div>
-                  <p className="text-sm font-medium text-white/80">
-                    Verify your email
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-white/40">
-                    Click the link in the email to activate your MediPass
-                    account.
-                  </p>
-                </div>
-              </div>
-
-              {/* Resend */}
-              <button
-                type="button"
-                onClick={resendEmail}
-                disabled={loading || !email}
-                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-black transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    Resend confirmation email
-                    <ArrowRight
-                      size={16}
-                      className="transition-transform group-hover:translate-x-0.5"
-                    />
-                  </>
-                )}
-              </button>
-
-              {/* Back */}
-              <Link
-                href="/auth"
-                className="mt-5 flex items-center justify-center gap-2 text-sm text-white/40 transition hover:text-white/70"
-              >
-                <ArrowLeft size={15} />
-                Back to sign in
-              </Link>
+          {/* Main Verification Card Content */}
+          <div className="my-auto py-2 text-center">
+            {/* Ambient Mail Icon */}
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#18392B]/10 text-[#18392B] shadow-sm">
+              <Mail size={24} />
             </div>
 
-            {/* Footer */}
-            <p className="mt-6 text-center text-[11px] uppercase tracking-[0.18em] text-white/20">
-              Your health data belongs to you
+            <h1 className="font-serif text-3xl font-normal tracking-tight text-[#121312] sm:text-4xl">
+              Check Your Inbox
+            </h1>
+
+            <p className="mt-2 font-mono text-xs leading-relaxed text-[#121312]/60">
+              We&apos;ve dispatched a secure verification passkey to activate
+              your health vault.
             </p>
+
+            {/* Email Address Pill */}
+            {email && (
+              <div className="mt-4 rounded-xl border border-[#121312]/10 bg-[#F8F6F0] px-4 py-2.5">
+                <p className="truncate font-mono text-xs font-semibold text-[#18392B]">
+                  {email}
+                </p>
+              </div>
+            )}
+
+            {/* Security Note Box */}
+            <div className="mt-5 flex items-start gap-3 rounded-2xl border border-[#121312]/10 bg-[#F8F6F0]/60 p-3.5 text-left">
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#18392B]/10 text-[#18392B]">
+                <CheckCircle2 size={14} />
+              </div>
+              <div>
+                <p className="font-mono text-xs font-semibold text-[#121312]">
+                  Verification Required
+                </p>
+                <p className="mt-0.5 font-mono text-[10px] leading-relaxed text-[#121312]/50">
+                  Select the confirmation link inside the email to authorize
+                  your sovereign account.
+                </p>
+              </div>
+            </div>
+
+            {/* Resend CTA */}
+            <button
+              type="button"
+              onClick={resendEmail}
+              disabled={loading || !email}
+              className="group mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#121312] font-mono text-xs font-semibold uppercase tracking-wider text-[#F8F6F0] shadow-sm transition-all hover:bg-[#18392B] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>Dispatching...</span>
+                </>
+              ) : (
+                <>
+                  <span>Resend Confirmation Email</span>
+                  <ArrowRight
+                    size={15}
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                  />
+                </>
+              )}
+            </button>
+
+            {/* Back to sign in link */}
+            <div className="mt-4">
+              <Link
+                href="/auth"
+                className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-[#18392B] transition hover:underline"
+              >
+                <ArrowLeft size={13} />
+                <span>Return to sign in</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Footer Security Badge */}
+          <div className="border-t border-[#121312]/5 pt-4 text-center">
+            <div className="flex items-center justify-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[#121312]/40">
+              <ShieldCheck size={12} className="text-[#18392B]" />
+              <span>Sovereign Identity Protection</span>
+            </div>
           </div>
         </div>
       </div>

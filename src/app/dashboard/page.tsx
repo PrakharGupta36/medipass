@@ -1,5 +1,3 @@
-// src/app/dashboard/page.tsx
-
 import EmailVerificationBanner from "@/components/dashboard/email-verification-banner";
 import HealthOverview from "@/components/dashboard/health-overview";
 import MedicalPassport from "@/components/dashboard/medical-passport";
@@ -31,75 +29,71 @@ export default async function DashboardPage() {
   const email = user.email || "";
 
   return (
-    <div className="relative">
-      {/* =========================================================
-          PAGE ATMOSPHERE
-      ========================================================== */}
-
-      <div className="pointer-events-none absolute -top-24 right-0 hidden h-72 w-72 rounded-full bg-[#1F7A4F]/[0.035] blur-[100px] lg:block" />
-
-      {/* =========================================================
-          EMAIL STATUS
-      ========================================================== */}
-
+    <div className="relative font-sans text-[#121312] selection:bg-[#202220] selection:text-[#F8F6F0]">
       {email && !user.email_confirmed_at && (
-        <EmailVerificationBanner email={email} />
+        <div className="animate-rise-in mb-8">
+          <EmailVerificationBanner email={email} />
+        </div>
       )}
 
+      <div className="space-y-10">
+        <section>
+          <div className="grid gap-6 xl:grid-cols-[1.55fr_0.85fr]">
+            <div
+              className="animate-tumble-in"
+              style={{ animationDelay: "80ms" }}
+            >
+              <MedicalPassport name={name} email={email} />
+            </div>
+            <div
+              className="hover-tilt animate-tumble-in"
+              style={{ animationDelay: "160ms" }}
+            >
+              <HealthOverview />
+            </div>
+          </div>
+        </section>
 
-      {/* =========================================================
-          IDENTITY / HEALTH
-      ========================================================== */}
+        <section>
+          <div className="grid gap-6 lg:grid-cols-[1.45fr_0.75fr]">
+            <div
+              className="animate-rise-in"
+              style={{ animationDelay: "240ms" }}
+            >
+              <RecentActivity />
+            </div>
+            <div
+              className="hover-tilt animate-tumble-in"
+              style={{ animationDelay: "320ms" }}
+            >
+              <ShareCard />
+            </div>
+          </div>
+        </section>
+      </div>
 
-      <section>
-        
-
-        <div className="grid gap-5 xl:grid-cols-[1.5fr_0.85fr]">
-          <MedicalPassport name={name} email={email} />
-
-          <HealthOverview />
-        </div>
-      </section>
-
-      {/* =========================================================
-          ACTIVITY / ACCESS
-      ========================================================== */}
-
-      <section className="mt-8">
-        <div className="mb-3 flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <span className="h-1 w-1 rounded-full bg-white/20" />
-
-            <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/20">
-              Record activity
+      <footer
+        className="animate-rise-in mt-16 border-t border-[#121312]/10 pt-6"
+        style={{ animationDelay: "420ms" }}
+      >
+        <div className="flex flex-col gap-4 font-mono text-[10px] text-[#121312]/40 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18392B] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18392B]" />
+            </span>
+            <span className="uppercase tracking-[0.18em]">
+              MediPass Vault &middot; High-Security Vault
             </span>
           </div>
 
-          <span className="font-mono text-[8px] text-white/15">02 / 02</span>
+          <div className="flex items-center gap-6 tracking-[0.14em]">
+            <span>CONFIDENTIAL</span>
+            <span>&middot;</span>
+            <span>END-TO-END ENCRYPTED</span>
+          </div>
         </div>
-
-        <div className="grid gap-5 lg:grid-cols-[1.45fr_0.75fr]">
-          <RecentActivity />
-
-          <ShareCard />
-        </div>
-      </section>
-
-      {/* =========================================================
-          FOOTER STATUS
-      ========================================================== */}
-
-      <div className="mt-8 flex items-center justify-between border-t border-white/[0.045] px-1 pt-4">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#62C58C]/60" />
-
-          <span className="font-mono text-[8px] uppercase tracking-[0.16em] text-white/15">
-            MediPass secure record
-          </span>
-        </div>
-
-        <span className="font-mono text-[8px] text-white/10">PRIVATE</span>
-      </div>
+      </footer>
     </div>
   );
 }

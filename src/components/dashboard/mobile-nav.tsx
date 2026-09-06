@@ -1,122 +1,99 @@
+// src/components/dashboard/mobile-nav.tsx
+
 "use client";
 
-import Link from "next/link";
 import {
   Activity,
+  Bot,
   FileText,
   Home,
   QrCode,
   Settings,
   UserRound,
 } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, type Transition } from "framer-motion";
+import { playHoverSound, playSelectSound } from "@/lib/sounds";
+
+const springConfig: Transition = {
+  type: "spring",
+  stiffness: 400,
+  damping: 30,
+  mass: 0.8,
+};
 
 export default function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav
-      className="
-        fixed inset-x-0 bottom-0 z-50
-        px-3
-        pb-[calc(12px+env(safe-area-inset-bottom))]
-        lg:hidden
+    <nav className="fixed inset-x-0 bottom-5 z-50 flex justify-center px-3 lg:hidden">
+      {/* Instagram-style rounded pill glass container */}
+      <div
+        className="
+        flex items-center gap-1.5 overflow-x-auto rounded-full
+        border border-white/40 bg-[#F0EDE6]/80 p-2
+        shadow-[0_12px_32px_rgba(18,19,18,0.12)]
+        backdrop-blur-xl backdrop-saturate-150
+        no-scrollbar max-w-full
       "
-    >
-      <div className="mx-auto w-full max-w-[430px]">
-        {/* Physical glass housing */}
-        <div
-          className="
-            relative
-            overflow-hidden
-            rounded-full
-            border border-white/[0.12]
-            bg-[#101612]/80
-            p-1.5
-            shadow-[0_20px_60px_rgba(0,0,0,0.55)]
-            backdrop-blur-2xl
-            backdrop-saturate-150
+      >
+        {/* Dashboard */}
+        <MobileNavItem
+          href="/dashboard"
+          icon={<Home size={17} strokeWidth={2} />}
+          label="Dashboard"
+          active={pathname === "/dashboard"}
+        />
 
-            before:pointer-events-none
-            before:absolute
-            before:inset-[1px]
-            before:rounded-[22px]
-            before:border
-            before:border-white/[0.035]
+        {/* Health */}
+        <MobileNavItem
+          href="/dashboard/health"
+          icon={<Activity size={17} strokeWidth={2} />}
+          label="Health Records"
+          active={pathname.startsWith("/dashboard/health")}
+        />
 
-            after:pointer-events-none
-            after:absolute
-            after:left-[10%]
-            after:right-[10%]
-            after:top-0
-            after:h-px
-            after:bg-white/[0.12]
-          "
-        >
-          {/* Subtle glass reflection */}
-          <div
-            className="
-              pointer-events-none
-              absolute
-              inset-x-8
-              top-0
-              h-8
-              rounded-full
-              bg-white/[0.025]
-              blur-xl
-            "
-          />
+        {/* Timeline */}
+        <MobileNavItem
+          href="/dashboard/timeline"
+          icon={<FileText size={17} strokeWidth={2} />}
+          label="Timeline"
+          active={pathname.startsWith("/dashboard/timeline")}
+        />
 
-          <div className="relative z-10 flex items-center gap-1">
-            <MobileNavItem
-              href="/dashboard"
-              icon={<Home size={18} strokeWidth={1.8} />}
-              label="Home"
-              active={pathname === "/dashboard"}
-            />
+        {/* Experimental AI */}
+        <MobileNavItem
+          href="/dashboard/assistant"
+          icon={<Bot size={17} strokeWidth={2} />}
+          label="AI Assistant"
+          active={pathname.startsWith("/dashboard/assistant")}
+          experimental
+        />
 
-            <MobileNavItem
-              href="/dashboard/health"
-              icon={<Activity size={18} strokeWidth={1.8} />}
-              label="Health"
-              active={pathname.startsWith("/dashboard/health")}
-            />
+        {/* Share */}
+        <MobileNavItem
+          href="/dashboard/share"
+          icon={<QrCode size={17} strokeWidth={2} />}
+          label="Share Record"
+          active={pathname.startsWith("/dashboard/share")}
+        />
 
-            <MobileNavItem
-              href="/dashboard/timeline"
-              icon={<FileText size={18} strokeWidth={1.8} />}
-              label="Timeline"
-              active={pathname.startsWith("/dashboard/timeline")}
-            />
+        {/* Profile */}
+        <MobileNavItem
+          href="/dashboard/profile"
+          icon={<UserRound size={17} strokeWidth={2} />}
+          label="Profile"
+          active={pathname.startsWith("/dashboard/profile")}
+        />
 
-            {/* Primary action */}
-            <MobileNavItem
-              href="/dashboard/share"
-              icon={<QrCode size={19} strokeWidth={1.9} />}
-              label="Share"
-              active={pathname.startsWith("/dashboard/share")}
-              primary
-            />
-
-            <MobileNavItem
-              href="/dashboard/profile"
-              icon={<UserRound size={18} strokeWidth={1.8} />}
-              label="Profile"
-              active={pathname.startsWith("/dashboard/profile")}
-            />
-
-            {/* Small divider before account settings */}
-            <div className="mx-0.5 h-7 w-px bg-white/[0.08]" />
-
-            <MobileNavItem
-              href="/dashboard/settings"
-              icon={<Settings size={17} strokeWidth={1.8} />}
-              label="Settings"
-              active={pathname.startsWith("/dashboard/settings")}
-              settings
-            />
-          </div>
-        </div>
+        {/* Settings */}
+        <MobileNavItem
+          href="/dashboard/settings"
+          icon={<Settings size={17} strokeWidth={2} />}
+          label="Settings"
+          active={pathname.startsWith("/dashboard/settings")}
+        />
       </div>
     </nav>
   );
@@ -127,102 +104,50 @@ function MobileNavItem({
   icon,
   label,
   active,
-  primary = false,
-  settings = false,
+  experimental = false,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   active: boolean;
-  primary?: boolean;
-  settings?: boolean;
+  experimental?: boolean;
 }) {
   return (
     <Link
       href={href}
       aria-label={label}
-      data-cuelume-hover="tick"
-      data-cuelume-press
-      data-cuelume-release
-      className={`
-        group
-        relative
-        flex
-        h-[46px]
-        min-w-0
-        flex-1
-        items-center
-        justify-center
-        rounded-[17px]
-        transition-all
-        duration-200
-        ease-out
-
-        active:scale-[0.94]
-
-        ${
-          active
-            ? primary
-              ? "bg-[#1F7A4F]/25 text-[#72D39A]"
-              : "bg-white/[0.075] text-[#72D39A]"
-            : "text-white/35 hover:bg-white/[0.045] hover:text-white/70"
-        }
-
-        ${settings ? "max-w-[44px]" : ""}
-      `}
+      onClick={playSelectSound}
+      onMouseEnter={playHoverSound}
+      className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
     >
-      {/* Inset active surface */}
+      {/* Active Pill Background */}
       {active && (
-        <>
-          <span
-            className="
-              pointer-events-none
-              absolute
-              inset-[2px]
-              rounded-[15px]
-              border
-              border-white/[0.07]
-              shadow-[inset_0_1px_0_rgba(255,255,255,0.08),inset_0_-4px_10px_rgba(0,0,0,0.18)]
-            "
-          />
-
-          <span
-            className="
-              pointer-events-none
-              absolute
-              bottom-[4px]
-              left-1/2
-              h-[2px]
-              w-4
-              -translate-x-1/2
-              rounded-full
-              bg-[#62C58C]
-              shadow-[0_0_10px_rgba(98,197,140,0.55)]
-            "
-          />
-        </>
+        <motion.div
+          layoutId="instagramPillActiveBg"
+          transition={springConfig}
+          className="absolute inset-0 rounded-full bg-[#18392B] shadow-md shadow-[#18392B]/20"
+        />
       )}
 
-      {/* Hover sheen */}
-      <span
-        className="
-          pointer-events-none
-          absolute
-          inset-0
-          rounded-[17px]
-          bg-gradient-to-b
-          from-white/[0.035]
-          to-transparent
-          opacity-0
-          transition-opacity
-          group-hover:opacity-100
-        "
-      />
-
-      {/* Icon */}
-      <span className="relative z-10 transition-transform duration-200 group-active:translate-y-px">
+      {/* Bordered Icon Badge Container */}
+      <div
+        className={`
+          relative z-10 flex h-8 w-8 items-center justify-center rounded-full
+          border transition-all duration-300
+          ${
+            active
+              ? "border-white/30 bg-white/10 text-white"
+              : "border-[#121312]/15 bg-white/40 text-[#121312]/60 hover:border-[#121312]/30 hover:bg-white hover:text-[#121312]"
+          }
+        `}
+      >
         {icon}
-      </span>
+
+        {/* Experimental indicator */}
+        {experimental && !active && (
+          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-[#F0EDE6] bg-[#18392B]" />
+        )}
+      </div>
     </Link>
   );
 }

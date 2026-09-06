@@ -1,6 +1,9 @@
+// src/app/dashboard/profile/page.tsx
+
 import { createClient } from "@/lib/supabase/server";
 import {
   CalendarDays,
+  CheckCircle2,
   Droplets,
   Mail,
   Phone,
@@ -8,6 +11,12 @@ import {
   UserRound,
 } from "lucide-react";
 import { updateProfile } from "./actions";
+import {
+  MotionCard,
+  MotionStat,
+  ProfileClientContainer,
+  SubmitFooter,
+} from "./profile-client";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -33,7 +42,7 @@ export default async function ProfilePage() {
     "";
 
   const memberSince = user.created_at
-    ? new Date(user.created_at).toLocaleDateString(undefined, {
+    ? new Date(user.created_at).toLocaleDateString("en-IN", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -41,105 +50,128 @@ export default async function ProfilePage() {
     : "—";
 
   return (
-    <div>
-      {/* Mobile heading */}
-      
+    <ProfileClientContainer>
+      <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+        {/* Identity Card */}
+        <MotionCard className="flex flex-col justify-between rounded-3xl border border-[#121312]/10 bg-white/80 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md sm:p-8">
+          <div>
+            <div className="flex flex-col items-center text-center">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-[#18392B]/20 bg-[#F8F6F0] text-[#18392B] shadow-inner sm:h-24 sm:w-24">
+                <UserRound size={36} strokeWidth={1.5} className="sm:hidden" />
+                <UserRound
+                  size={42}
+                  strokeWidth={1.5}
+                  className="hidden sm:block"
+                />
+                <span className="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-[#18392B]" />
+              </div>
 
-      <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
-        {/* Identity */}
-        <section className="rounded-[26px] border border-white/[0.07] bg-[#111712] p-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-[#62C58C]/20 bg-[#1F7A4F]/10 text-[#62C58C]">
-              <UserRound size={38} strokeWidth={1.5} />
+              <h1 className="mt-4 font-serif text-xl font-normal text-[#121312] sm:text-2xl">
+                {name}
+              </h1>
+
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="rounded-full border border-[#18392B]/15 bg-[#18392B]/5 px-2.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.14em] text-[#18392B]">
+                  Verified Account
+                </span>
+              </div>
             </div>
 
-            <h2 className="mt-5 text-xl font-semibold">{name}</h2>
+            <div className="mt-6 space-y-3.5 border-t border-[#121312]/10 pt-6 sm:mt-8 sm:space-y-4">
+              <MotionStat
+                icon={<Mail size={15} />}
+                label="Email Address"
+                value={user.email || "Not added"}
+              />
 
-            <p className="mt-1 text-xs text-white/25">MediPass member</p>
+              <MotionStat
+                icon={<CalendarDays size={15} />}
+                label="Member Since"
+                value={memberSince}
+              />
+
+              <MotionStat
+                icon={<Droplets size={15} />}
+                label="Blood Group"
+                value={profile?.blood_group || "Not added"}
+              />
+            </div>
           </div>
 
-          <div className="mt-8 border-t border-white/[0.06] pt-6">
-            <ProfileStat
-              icon={<Mail size={16} />}
-              label="Email"
-              value={user.email || "Not added"}
-            />
-
-            <ProfileStat
-              icon={<CalendarDays size={16} />}
-              label="Member since"
-              value={memberSince}
-            />
-
-            <ProfileStat
-              icon={<Droplets size={16} />}
-              label="Blood group"
-              value={profile?.blood_group || "Not added"}
-            />
+          <div className="mt-8 rounded-2xl border border-[#121312]/5 bg-[#F8F6F0]/60 p-3.5 text-center">
+            <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/50">
+              MediPass Vault Status
+            </p>
+            <div className="mt-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-[#18392B]">
+              <CheckCircle2 size={13} />
+              <span>Sovereign Zero-Knowledge Active</span>
+            </div>
           </div>
-        </section>
+        </MotionCard>
 
-        {/* Personal information */}
-        <section className="rounded-[26px] border border-white/[0.07] bg-[#111712]">
-          <div className="border-b border-white/[0.06] px-6 py-5">
-            <p className="text-sm font-semibold">Personal information</p>
+        {/* Personal Information Form */}
+        <MotionCard className="rounded-3xl border border-[#121312]/10 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="border-b border-[#121312]/10 px-5 py-4.5 sm:px-8 sm:py-5">
+            <h2 className="font-serif text-base font-normal text-[#121312] sm:text-lg">
+              Personal Information
+            </h2>
 
-            <p className="mt-1 text-[10px] text-white/25">
-              Information used for your medical passport.
+            <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40 sm:text-[9px]">
+              Primary identification data for medical emergencies
             </p>
           </div>
 
           <form action={updateProfile}>
-            <div className="grid gap-5 p-6 sm:grid-cols-2">
+            <div className="grid gap-4 p-5 sm:grid-cols-2 sm:gap-5 sm:p-8">
               <FormField
-                label="Full name"
+                label="Full Name"
                 name="full_name"
                 defaultValue={profile?.full_name || name}
                 placeholder="Your full name"
               />
 
               <div>
-                <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.1em] text-white/25">
-                  Email address
+                <label className="mb-1.5 block font-mono text-[8px] font-semibold uppercase tracking-wider text-[#121312]/50 sm:text-[9px]">
+                  Email Address
                 </label>
 
-                <div className="flex h-11 items-center gap-2 rounded-xl border border-white/[0.07] bg-[#0C110E] px-3.5">
-                  <Mail size={14} className="shrink-0 text-white/25" />
+                <div className="flex h-10 items-center gap-2 rounded-xl border border-[#121312]/10 bg-[#F8F6F0]/60 px-3.5 sm:h-11">
+                  <Mail size={14} className="shrink-0 text-[#121312]/30" />
 
-                  <span className="truncate text-xs text-white/45">
+                  <span className="truncate text-xs font-medium text-[#121312]/60">
                     {user.email}
                   </span>
                 </div>
 
-                <p className="mt-1.5 text-[9px] text-white/20">
-                  Email is managed by your account.
+                <p className="mt-1 font-mono text-[8px] text-[#121312]/40 sm:text-[9px]">
+                  Managed via authentication settings
                 </p>
               </div>
 
               <FormField
-                label="Phone number"
+                label="Phone Number"
                 name="phone"
                 type="tel"
                 defaultValue={profile?.phone || ""}
-                placeholder="e.g. +91 98765 43210"
+                placeholder="+91 98765 43210"
               />
 
               <FormField
-                label="Date of birth"
+                label="Date of Birth"
                 name="date_of_birth"
                 type="date"
                 defaultValue={profile?.date_of_birth || ""}
               />
 
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.1em] text-white/25">
-                  Blood group
+                <label className="mb-1.5 block font-mono text-[8px] font-semibold uppercase tracking-wider text-[#121312]/50 sm:text-[9px]">
+                  Blood Group
                 </label>
 
                 <select
                   name="blood_group"
                   defaultValue={profile?.blood_group || ""}
-                  className="h-11 w-full rounded-xl border border-white/[0.07] bg-[#0C110E] px-3.5 text-xs text-white/60 outline-none transition focus:border-[#62C58C]/30 focus:ring-2 focus:ring-[#62C58C]/10"
+                  className="h-10 w-full rounded-xl border border-[#121312]/10 bg-white px-3.5 text-xs text-[#121312] outline-none transition focus:border-[#18392B] focus:ring-1 focus:ring-[#18392B] sm:h-11"
                 >
                   <option value="">Select blood group</option>
                   <option value="A+">A+</option>
@@ -154,32 +186,34 @@ export default async function ProfilePage() {
               </div>
             </div>
 
-            {/* Emergency */}
-            <div className="border-t border-white/[0.06] px-6 py-5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#D7A73A]/10 text-[#D7A73A]">
-                  <ShieldAlert size={17} />
+            {/* Emergency Contact */}
+            <div className="border-t border-[#121312]/10 px-5 py-5 sm:px-8 sm:py-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F8F6F0] text-[#18392B] shadow-xs">
+                  <ShieldAlert size={18} />
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold">Emergency contact</p>
+                  <h3 className="font-serif text-sm font-normal text-[#121312] sm:text-base">
+                    Emergency Contact
+                  </h3>
 
-                  <p className="mt-1 text-[10px] leading-5 text-white/25">
-                    Someone a doctor can contact in an emergency.
+                  <p className="font-mono text-[8px] uppercase tracking-wider text-[#121312]/40 sm:text-[9px]">
+                    Primary contact for medical field responders
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              <div className="mt-4 grid gap-4 sm:mt-5 sm:grid-cols-2 sm:gap-5">
                 <FormField
-                  label="Contact name"
+                  label="Contact Name"
                   name="emergency_contact_name"
                   defaultValue={profile?.emergency_contact_name || ""}
-                  placeholder="Emergency contact"
+                  placeholder="Full name"
                 />
 
                 <FormField
-                  label="Contact phone"
+                  label="Contact Phone"
                   name="emergency_contact_phone"
                   type="tel"
                   defaultValue={profile?.emergency_contact_phone || ""}
@@ -188,22 +222,11 @@ export default async function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-white/[0.06] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[10px] leading-5 text-white/20">
-                Your information is stored in your private medical profile.
-              </p>
-
-              <button
-                type="submit"
-                className="h-10 rounded-xl bg-[#246B45] px-5 text-xs font-semibold text-white transition hover:bg-[#2C7D53]"
-              >
-                Save profile
-              </button>
-            </div>
+            <SubmitFooter />
           </form>
-        </section>
+        </MotionCard>
       </div>
-    </div>
+    </ProfileClientContainer>
   );
 }
 
@@ -224,7 +247,7 @@ function FormField({
     <div>
       <label
         htmlFor={name}
-        className="mb-2 block text-[10px] font-medium uppercase tracking-[0.1em] text-white/25"
+        className="mb-1.5 block font-mono text-[8px] font-semibold uppercase tracking-wider text-[#121312]/50 sm:text-[9px]"
       >
         {label}
       </label>
@@ -233,7 +256,7 @@ function FormField({
         {type === "tel" && (
           <Phone
             size={14}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#121312]/30"
           />
         )}
 
@@ -243,36 +266,10 @@ function FormField({
           type={type}
           defaultValue={defaultValue}
           placeholder={placeholder}
-          className={`h-11 w-full rounded-xl border border-white/[0.07] bg-[#0C110E] pr-3.5 text-xs text-white/70 outline-none transition placeholder:text-white/15 focus:border-[#62C58C]/30 focus:ring-2 focus:ring-[#62C58C]/10 ${
+          className={`h-10 w-full rounded-xl border border-[#121312]/10 bg-white pr-3.5 text-xs text-[#121312] outline-none transition placeholder:text-[#121312]/30 focus:border-[#18392B] focus:ring-1 focus:ring-[#18392B] sm:h-11 ${
             type === "tel" ? "pl-10" : "pl-3.5"
           }`}
         />
-      </div>
-    </div>
-  );
-}
-
-function ProfileStat({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="mb-5 flex gap-3 last:mb-0">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.03] text-white/30">
-        {icon}
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-[9px] uppercase tracking-[0.12em] text-white/20">
-          {label}
-        </p>
-
-        <p className="mt-1 truncate text-xs text-white/55">{value}</p>
       </div>
     </div>
   );

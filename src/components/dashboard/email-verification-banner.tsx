@@ -1,3 +1,5 @@
+// src/components/dashboard/email-verification-banner.tsx
+
 "use client";
 
 import { AlertTriangle, ArrowRight, X } from "lucide-react";
@@ -18,45 +20,37 @@ export default function EmailVerificationBanner({
   }
 
   return (
-    <div className="relative mb-5 overflow-hidden rounded-2xl border border-[#D7A73A]/20 bg-[#18160F]">
-      {/* Left accent */}
-      <div className="absolute inset-y-0 left-0 w-1 bg-[#D7A73A]" />
-
-      <div className="flex flex-col gap-4 p-4 pl-5 sm:flex-row sm:items-center sm:justify-between">
-        {/* Message */}
-        <div className="flex min-w-0 gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#D7A73A]/10 text-[#D7A73A]">
-            <AlertTriangle size={17} />
+    <div className="relative overflow-hidden rounded-2xl border border-[#B38029]/30 bg-[#FFFDF5] p-4 text-[#4A3710]">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#B38029]/10 text-[#B38029]">
+            <AlertTriangle size={16} />
           </div>
 
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-[#ECE8DB]">
-              Your email isn&apos;t verified
-            </p>
-
-            <p className="mt-0.5 text-xs leading-5 text-[#958F7C]">
-              Verify your email to keep your MediPass account secure.
+          <div>
+            <p className="text-xs font-semibold">Email Unverified</p>
+            <p className="mt-0.5 text-xs text-[#4A3710]/70">
+              Please verify <span className="font-mono">{email}</span> to secure
+              access.
             </p>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex shrink-0 items-center gap-2 pl-12 sm:pl-0">
+        <div className="flex items-center gap-2">
           <Link
             href={`/auth/verify-email?email=${encodeURIComponent(email)}`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#D7A73A] px-3 text-xs font-semibold text-[#171309] transition hover:bg-[#E5B94F]"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#B38029] px-3 font-mono text-xs font-semibold text-white transition hover:bg-[#966A20]"
           >
-            Verify email
-            <ArrowRight size={14} />
+            <span>Verify</span>
+            <ArrowRight size={13} />
           </Link>
 
           <button
             type="button"
             onClick={() => setDismissed(true)}
-            className="rounded-lg p-2 text-[#706B5D] transition hover:bg-white/[0.05] hover:text-[#A9A392]"
-            aria-label="Dismiss email verification warning"
+            className="rounded-lg p-1.5 text-[#4A3710]/40 hover:bg-[#B38029]/10 hover:text-[#4A3710]"
           >
-            <X size={15} />
+            <X size={14} />
           </button>
         </div>
       </div>

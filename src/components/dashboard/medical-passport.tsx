@@ -3,14 +3,8 @@
 "use client";
 
 import { DoubleBorderCard } from "@/components/ui/double-border-card";
-import { ArrowUpRight, Fingerprint, QrCode, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, Fingerprint, QrCode } from "lucide-react";
 import Link from "next/link";
-
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
 
 export default function MedicalPassport({
   name,
@@ -19,22 +13,12 @@ export default function MedicalPassport({
   name: string;
   email: string;
 }) {
-  const initials = getInitials(name);
-
   return (
     <DoubleBorderCard variant="light" className="w-full">
       <div className="relative z-10 flex flex-col justify-between h-full text-[#121312]">
         {/* Header Block */}
         <div className="flex items-center gap-4 sm:gap-5">
           {/* Raised Monogram Seal */}
-          <div className="relative p-0.5 rounded-2xl border border-black/10 bg-gradient-to-b from-white to-[#E5E0D8] shadow-[0_3px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,1)_inset]">
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-b from-[#1c4031] to-[#122b20] font-serif text-xl text-[#F8F6F0] shadow-[0_2px_4px_rgba(0,0,0,0.3)_inset,0_1px_0_rgba(255,255,255,0.2)]">
-              {initials}
-              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-[#1c4031] text-emerald-300 shadow-xs">
-                <ShieldCheck size={11} strokeWidth={2.5} />
-              </span>
-            </div>
-          </div>
 
           {/* Identity Meta */}
           <div className="min-w-0 flex-1">

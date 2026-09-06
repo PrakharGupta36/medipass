@@ -29,50 +29,47 @@ export default async function DashboardPage() {
   const email = user.email || "";
 
   return (
-    <div className="relative font-sans text-[#121312] selection:bg-[#202220] selection:text-[#F8F6F0]">
+    <div className="relative mx-auto max-w-4xl font-sans text-[#121312] selection:bg-[#202220] selection:text-[#F8F6F0]">
       {email && !user.email_confirmed_at && (
-        <div className="animate-rise-in mb-8">
+        <div className="animate-rise-in mb-6">
           <EmailVerificationBanner email={email} />
         </div>
       )}
 
-      <div className="space-y-10">
-        <section>
-          <div className="grid gap-6 xl:grid-cols-[1.55fr_0.85fr]">
-            <div
-              className="animate-tumble-in"
-              style={{ animationDelay: "80ms" }}
-            >
-              <MedicalPassport name={name} email={email} />
-            </div>
-            <div
-              className="hover-tilt animate-tumble-in"
-              style={{ animationDelay: "160ms" }}
-            >
-              <HealthOverview />
-            </div>
-          </div>
+      <main className="space-y-6">
+        {/* Primary Identification */}
+        <section
+          className="animate-tumble-in"
+          style={{ animationDelay: "80ms" }}
+        >
+          <MedicalPassport name={name} email={email} />
         </section>
 
-        <section>
-          <div className="grid gap-6 lg:grid-cols-[1.45fr_0.75fr]">
-            <div
-              className="animate-rise-in"
-              style={{ animationDelay: "240ms" }}
-            >
-              <RecentActivity />
-            </div>
-            <div
-              className="hover-tilt animate-tumble-in"
-              style={{ animationDelay: "320ms" }}
-            >
-              <ShareCard />
-            </div>
-          </div>
-        </section>
-      </div>
+        {/* Activity Logs */}
 
-     
+        <section
+          className="animate-rise-in"
+          style={{ animationDelay: "320ms" }}
+        >
+          <RecentActivity />
+        </section>
+
+        {/* Health Metrics Overview */}
+        <section
+          className="animate-tumble-in"
+          style={{ animationDelay: "240ms" }}
+        >
+          <HealthOverview />
+        </section>
+
+        {/* Quick Share Action */}
+        <section
+          className="animate-tumble-in"
+          style={{ animationDelay: "160ms" }}
+        >
+          <ShareCard />
+        </section>
+      </main>
     </div>
   );
 }

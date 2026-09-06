@@ -288,7 +288,7 @@ export default function DashboardSidebar({
                     "
                   >
                     <LogOut size={13} strokeWidth={2} className="shrink-0" />
-                    <span>Sign Out</span>
+                    <span className="text-xs">Sign Out</span>
                   </button>
                 </form>
               </motion.div>
@@ -296,25 +296,7 @@ export default function DashboardSidebar({
           </AnimatePresence>
         </div>
 
-        {/* FOOTER META */}
-        <AnimatePresence mode="wait">
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="
-                mt-2 flex items-center justify-between
-                px-2 font-mono text-[8px]
-                uppercase tracking-[0.16em]
-                text-[#121312]/30
-              "
-            >
-              <span>Personal Vault</span>
-              <span>v2.4</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        
       </div>
     </motion.aside>
   );

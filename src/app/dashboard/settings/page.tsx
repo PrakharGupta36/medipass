@@ -21,6 +21,7 @@ export default async function SettingsPage() {
 
   return (
     <SettingsClient
+      userId={user.id}
       email={user.email || ""}
       emailVerified={!!user.email_confirmed_at}
       notificationsEnabled={profile?.notifications_enabled ?? true}
